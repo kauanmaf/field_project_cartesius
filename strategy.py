@@ -48,29 +48,20 @@ class MA_crossover(Strategy):
         long_average = self.moving_average(self.data["Adj Close"], self.long_period)
         short_average = self.moving_average(self.data["Adj Close"], self.short_period)
         
-        # Matriz com as duas médias lado a lado
-        aux_matrix = np.hstack((long_average.values.reshape(-1, 1), short_average.values[short_average.size - long_average.size:].reshape(-1, 1)))
+        # Fazendo a interseção dos valores das médias de acordo com as datas
+        long_average_aligned, short_average_aligned = long_average.align(short_average, join = "inner")
+        # Calculando a diferença entre as médias
+        diff = short_average_aligned - long_average_aligned
+        # Calculando a variação diária da média curta
+        short_average_var = short_average_aligned.diff()
         
-        # Vetor que analisa quando a média curta é maior que a longa
-        bool_vector = aux_matrix[:, 1] > aux_matrix[:, 0]
-        
-        # Analisando quando a média curta cruza a longa
-        bool_matrix = np.zeros((bool_vector.size + 1, 2))
-        bool_matrix[1:, 0] = bool_vector
-        bool_matrix[:-1, 1] = bool_vector
-        evaluation = bool_matrix[1:-1, 1] - bool_matrix[1:-1, 0]
-        evaluation = evaluation.astype(str)
+        # Se a média curta está maior que a longa e está subindo, compra
+        diff[(diff * short_average_var > 0) & (diff > 0)] = 1
+        # Se a média curta está menor que a longa e está descendo, vende
+        diff[(diff * short_average_var > 0) & (diff < 0)] = -1
+        # Se a média curta está menor que a longa e está subindo ou maior e descendo, fica neutro
+        diff[diff * short_average_var < 0] = 0
 
-        # TODO: Mudar o 0 de keep para zerar a posição, vender voce fica negativo
-        # Rotulando quando comprar, vender e manter
-        evaluation[evaluation == "0.0"] = "keep"
-        evaluation[evaluation == "1.0"] = "buy"
-        evaluation[evaluation == "-1.0"] = "sell"
-
-        # Adicionando a data à série
-        dated_evaluations = pd.Series(evaluation, long_average.index[1:])
-
-        return dated_evaluations
-        self.moving_average()
+        return diff
 
     
