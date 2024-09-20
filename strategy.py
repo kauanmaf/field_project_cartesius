@@ -41,3 +41,60 @@ class MA_crossover(Strategy):
         diff[diff * short_average_var < 0] = 0
 
         return diff
+
+class BollingerBands(Strategy):
+    # Setando o padrão com o tamanho sendo 20 e o desvio padrão sendo 2
+    def __init__(self, data: pd.Series, period: int = 20, num_std: float = 2.0):
+        super().__init__()
+        self.data = data
+        self.period = period
+        self.num_std = num_std
+
+    def run(self):
+        # Calculando a média móvel e o desvio padrão
+        mid_band = self.moving_average(self.data, self.period)
+        rolling_std = self.data.rolling(window=self.period).std()
+        
+        # Calculando as duas linhas 
+        upper_band = mid_band + (self.num_std * rolling_std)
+        lower_band = mid_band - (self.num_std * rolling_std)
+        
+        # Inicializando os sinais como 0
+        signal = pd.Series(0, index=self.data.index)
+        
+        # Gerando os sinais de compra e venda
+        signal[self.data < lower_band] = 1  
+        signal[self.data > upper_band] = -1 
+        
+        return signal
+
+
+class MACD(Strategy):
+    # Inicializamos nossa estratégia com os padrões para o macd, com o short sendo 12, o longo sendo 26 e a média móvel sendo 9
+    def __init__(self, data: pd.Series, short_period: int = 12, long_period: int = 26, signal_period: int = 9) -> None:
+        super().__init__()
+        self.data = data
+        self.short_period = short_period
+        self.long_period = long_period
+        self.signal_period = signal_period
+
+    def run(self):
+        # Calculando a média as duas médias móveis
+        short_ema = self.moving_average(self.data, self.short_period)
+        long_ema = self.moving_average(self.data, self.long_period)
+        
+        # A linha macd é a diminuição de uma pela outra
+        macd_line = short_ema - long_ema
+        
+        # A linha de sinal é 
+        signal_line = self.moving_average(macd_line, self.signal_period)
+        
+        # Calculate the difference between the MACD line and the signal line
+        diff = macd_line - signal_line
+        
+        # Generate buy, sell, and hold signals
+        diff[diff > 0] = 1  # Buy signal when MACD is above the signal line
+        diff[diff < 0] = -1  # Sell signal when MACD is below the signal line
+        diff[diff == 0] = 0  # Neutral signal when MACD equals the signal line
+        
+        return diff
