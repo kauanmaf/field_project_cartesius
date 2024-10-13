@@ -1,5 +1,5 @@
 import pandas as pd
-from backtesting import Strategy
+from backtesting import Strategy, Backtest
 
 # Carregando os dados e ajustando o datetime
 tsla_data = pd.read_csv("data/TSLA.csv")
@@ -59,3 +59,24 @@ class OurStrategy(Strategy):
         # Se sinal for -1, vende apenas se há uma posição aberta (long)
         elif self.data.Signal[-1] == -1 and self.position.is_short:
             self.sell()
+
+def run_signal_policy(tsla_data, policy_function, policy_name, body=None):
+    # Gerando os sinais que dão match com a política
+    if body is not None:
+        policy = policy_function(tsla_data, body)
+    else:
+        policy = policy_function(tsla_data)
+
+    # Definindo os pontos de saída
+    exit_points(tsla_data, policy, 5, 1)
+
+    # Adicionando uma coluna sinal
+    tsla_data["Signal"] = 0
+    tsla_data.loc[policy.index, "Signal"] = policy
+
+    # Rodando o backtest
+    bt = Backtest(tsla_data, OurStrategy, cash=10000)
+    stats = bt.run()
+
+    # Renomeando a coluna de sinal
+    tsla_data.rename(columns={"Signal": f"Signal_{policy_name}"}, inplace=True)

@@ -1,8 +1,7 @@
 import pandas as pd
-import numpy as np
-import backtesting
 from tradingUtils import *
-from backtesting import Backtest, Strategy
+
+data = tsla_data
 
 signal_policies = {}
 
@@ -201,35 +200,14 @@ def hikkake_pattern_policy(data):
 
     return result
 
-def run_signal_policy(tsla_data, policy_function, policy_name, body=None):
-    # Gerando os sinais que dão match com a política
-    if body is not None:
-        policy = policy_function(tsla_data, body=body)
-    else:
-        policy = policy_function(tsla_data)
-
-    # Definindo os pontos de saída
-    exit_points(tsla_data, policy, 5, 1)
-
-    # Adicionando uma coluna sinal
-    tsla_data["Signal"] = 0
-    tsla_data.loc[policy.index, "Signal"] = policy
-
-    # Rodando o backtest
-    bt = Backtest(tsla_data, OurStrategy, cash=10000)
-    stats = bt.run()
-
-    # Renomeando a coluna de sinal
-    tsla_data.rename(columns={"Signal": f"Signal_{policy_name}"}, inplace=True)
-
 # Executando as políticas
-run_signal_policy(tsla_data, MA_crossover_policy, "ma_crossover")
-run_signal_policy(tsla_data, MACD_pattern_policy, "macd_pattern")
-run_signal_policy(tsla_data, bollinger_bands_policy, "bollinger_bands")
-run_signal_policy(tsla_data, marubozu_pattern_policy, "marubozu_pattern")
-run_signal_policy(tsla_data, three_candles_policy, "three_candles_policy", body=0.1)
-run_signal_policy(tsla_data, tasuki_pattern_policy, "tasuki_pattern")
-run_signal_policy(tsla_data, hikkake_pattern_policy, "hikkake_pattern")
+run_signal_policy(data, MA_crossover_policy, "ma_crossover")
+run_signal_policy(data, MACD_pattern_policy, "macd_pattern")
+run_signal_policy(data, bollinger_bands_policy, "bollinger_bands")
+run_signal_policy(data, marubozu_pattern_policy, "marubozu_pattern")
+run_signal_policy(data, three_candles_policy, "three_candles_policy", body=0.1)
+run_signal_policy(data, tasuki_pattern_policy, "tasuki_pattern")
+run_signal_policy(data, hikkake_pattern_policy, "hikkake_pattern")
 
-ml_tsla_data = tsla_data.iloc[:, 6:]
+classic_ml_data = data.iloc[:, 6:]
 
