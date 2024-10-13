@@ -19,7 +19,6 @@ viva_data["Date"] = pd.to_datetime(viva_data["Date"])
 viva_data.set_index("Date", inplace = True)
 
 
-
 # Comum a todos, define os pontos de saída
 def exit_points(data, policy, max_window, win_rate):
     current_state = 0
