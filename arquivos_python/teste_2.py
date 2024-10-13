@@ -55,3 +55,33 @@ stats = bt.run()
 # Exibe os resultados
 print(stats)
 plot = bt.plot()
+
+
+def three_methods_pattern_policy(data):
+    result = pd.Series(0, index=data.index)
+    close = data['Close'].values
+    open_ = data['Open'].values
+    high = data['High'].values
+    low = data['Low'].values
+
+    for i in range(4, len(data)):  # Start from the 5th data point
+       
+        # Bullish Three Methods pattern
+        if (
+            (close[i - 4] > open_[i - 4]) and  
+            (close[i - 1] > close[i - 4]) and  
+            all(open_[j] > close[j] and close[j] < close[i - 4] for j in range(i - 3, i)) and  
+            all(low[j] > low[i - 4] and high[j] < high[i - 4] for j in range(i - 3, i)) 
+        ):
+            result.iloc[i] = 1  # Buy signal for the next day
+
+        # Bearish Three Methods pattern
+        elif (
+            (close[i - 4] < open_[i - 4]) and  
+            (close[i - 1] < close[i - 4]) and  
+            all(open_[j] < close[j] and close[j] > close[i - 4] for j in range(i - 3, i)) and  
+            all(low[j] > low[i - 4] and high[j] < high[i - 4] for j in range(i - 3, i))
+        ):
+            result.iloc[i] = -1  # Sell signal for the next day
+
+    return result
