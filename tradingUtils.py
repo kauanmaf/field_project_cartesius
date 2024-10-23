@@ -60,7 +60,7 @@ class OurStrategy(Strategy):
         elif self.data.Signal[-1] == -1 and self.position.is_short:
             self.sell()
 
-def run_signal_policy(tsla_data, policy_function, policy_name, body=None):
+def run_signal_policy(tsla_data, policy_function, policy_name, body=None, exec_back = True):
     # Gerando os sinais que dão match com a política
     if body is not None:
         policy = policy_function(tsla_data, body)
@@ -75,8 +75,9 @@ def run_signal_policy(tsla_data, policy_function, policy_name, body=None):
     tsla_data.loc[policy.index, "Signal"] = policy
 
     # Rodando o backtest
-    bt = Backtest(tsla_data, OurStrategy, cash=10000)
-    stats = bt.run()
+    if exec_back:
+        bt = Backtest(tsla_data, OurStrategy, cash=10000)
+        stats = bt.run()
 
     # Renomeando a coluna de sinal
     tsla_data.rename(columns={"Signal": f"Signal_{policy_name}"}, inplace=True)
