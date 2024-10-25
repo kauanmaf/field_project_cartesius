@@ -23,7 +23,3 @@ def labelData(data, max_variation):
     return label
 
 label_tsla_data = labelData(tsla_data, 0.1)
-
-print(label_tsla_data[label_tsla_data == 1].shape)
-print(label_tsla_data[label_tsla_data == -1].shape)
-print(label_tsla_data[label_tsla_data == 0].shape)

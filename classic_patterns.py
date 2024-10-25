@@ -210,4 +210,3 @@ run_signal_policy(data, tasuki_pattern_policy, "tasuki_pattern")
 run_signal_policy(data, hikkake_pattern_policy, "hikkake_pattern")
 
 classic_ml_data = data.iloc[:, 6:]
-
