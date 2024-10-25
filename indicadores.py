@@ -142,6 +142,14 @@ def stochastic_oscillator(data, stoch_period=14, smooth_k=3, smooth_d=3):
     stoch = ta.momentum.StochasticOscillator(high=data['High'], low=data['Low'], close=data['Adj Close'], window=stoch_period, smooth_window=smooth_k)
     return stoch.stoch(), stoch.stoch_signal()
 
+def relative_strength(data, window = 14):
+    rsi = ta.momentum.RSIIndicator(data["Adj Close"], window).rsi()
+    return rsi
+
+def awesome(data, window1 = 5, window2 = 34):
+    ao = ta.momentum.AwesomeOscillatorIndicator(data["High"], data["Low"], window1, window2).awesome_oscillator()
+    return ao
+
 ## Processing
 
 def agg_indicators(data):
@@ -162,7 +170,8 @@ def agg_indicators(data):
     dpo = detrended_price(data)
     stoch_rsi_k, stoch_rsi_d = stochastic_rsi(data)
     sto_osc, sto_sig = stochastic_oscillator(data)
-
+    rsi = relative_strength(data)
+    ao = awesome(data)
 
     indicators_df = pd.DataFrame({"ADX": adx,
                                   "Parabolic SAR": psar,
@@ -191,10 +200,12 @@ def agg_indicators(data):
                                   "Trix": ti,
                                   "Mass": mi,
                                   "DPO": dpo,
-                                  "stoch_rsi_k": stoch_rsi_k, 
-                                  "stoch_rsi_d": stoch_rsi_d,
-                                  "stoch_osc": sto_osc, 
-                                  "stoch_osc_sig": sto_sig})
+                                  "SRSI-k": stoch_rsi_k, 
+                                  "SRSI-d": stoch_rsi_d,
+                                  "Stochastic Oscillator": sto_osc, 
+                                  "Stochastic Oscillator Signal": sto_sig,
+                                  "RSI": rsi,
+                                  "Awesome": ao})
     
     return indicators_df
 
