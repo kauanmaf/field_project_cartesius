@@ -154,8 +154,8 @@ print("returns_series[21:30]")
 # print("labels.shape")
 # print(labels.shape)
 
-# # label_tsla_data = labelData(tsla_data, 0.1)
-
+label_tsla_data = labelData(tsla_data, 0.1)
+print(label_tsla_data)
 # # print(label_tsla_data[label_tsla_data == 1].shape)
 # # print(label_tsla_data[label_tsla_data == -1].shape)
 # # print(label_tsla_data[label_tsla_data == 0].shape)
