@@ -11,10 +11,10 @@ def labelData(data, max_variation):
             close_next = data.iloc[row + 1]["Adj Close"]
 
             # Check for upward variation
-            if close_next > close_current and (close_next - close_current) *100 / close_current >= max_variation:
+            if close_next > close_current and (close_next - close_current) * 100 / close_current >= max_variation:
                 label[row] = 1
             # Check for downward variation
-            elif close_next < close_current and abs((close_next - close_current) / close_current) >= max_variation:
+            elif close_next < close_current and (close_current - close_next) * 100 / close_current >= max_variation:
                 label[row] = -1
            
         except:
@@ -161,7 +161,7 @@ print("returns_series[21:30]")
 # print(labels.shape)
 
 label_tsla_data = labelData(tsla_data, 0.1)
-print(label_tsla_data)
+# print(label_tsla_data)
 # # print(label_tsla_data[label_tsla_data == 1].shape)
 # # print(label_tsla_data[label_tsla_data == -1].shape)
 # # print(label_tsla_data[label_tsla_data == 0].shape)
