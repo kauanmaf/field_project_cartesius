@@ -47,18 +47,27 @@ def exit_points(data, policy, max_window, win_rate):
 
 class OurStrategy(Strategy):
     def init(self):
-        # Inicializar qualquer coisa necessária, se houver
         pass
 
     def next(self):
-        # Se sinal for 1, compra apenas se não há posição aberta
-        if self.data.Signal[-1] == 1 and not self.position.is_long:
-            self.buy()
-        elif self.data.Signal[-1]== 0 and (self.position.is_short or self.position.is_long):
-            self.position.close()
-        # Se sinal for -1, vende apenas se há uma posição aberta (long)
-        elif self.data.Signal[-1] == -1 and self.position.is_short:
-            self.sell()
+        try:
+            if self.data.Signal[-1] == 1:
+                if not self.position.is_long:
+                    self.position.close()  # Close any existing short position
+                    self.buy()
+
+            # Sell signal
+            elif self.data.Signal[-1] == -1:
+                if not self.position.is_short:
+                    self.position.close()  # Close any existing long position
+                    self.sell()
+
+            # Close all positions if Signal is 0
+            elif self.data.Signal[-1] == 0:
+                self.position.close()
+        except:
+            pass
+
 
 def run_signal_policy(tsla_data, policy_function, policy_name, body=None, exec_back = True):
     # Gerando os sinais que dão match com a política
