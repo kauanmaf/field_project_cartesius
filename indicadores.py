@@ -2,7 +2,12 @@ import numpy as numpy
 import pandas as pd
 from tradingUtils import *
 import ta
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+import seaborn as sns
 
+
+## Trend Indicators
 def MACD(data, macd_fast=12, macd_slow=26, macd_signal=9):
    
     # Calculate the MACD, Signal Line, and MACD Histogram
@@ -74,6 +79,20 @@ def parabolic_sar(data, acceleration=0.02, max_acceleration=0.2):
     sar = ta.trend.PSARIndicator(high=data['High'], low=data['Low'], close=data['Adj Close'], step=acceleration, max_step=max_acceleration).psar()
     return sar
 
+def average_true_range(data, atr_period=14):
+    
+    atr = ta.volatility.AverageTrueRange(high = data['High'], low = data['Low'], close = data['Adj Close'], window=atr_period).average_true_range()
+    
+    return pd.Series(atr, index=data.index)
+
+def commodity_channel_index(data, cci_period=20):
+    
+    cci = ta.trend.CCIIndicator(high = data['High'], low = data['Low'], close = data['Adj Close'], window=cci_period).cci()
+    
+    return pd.Series(cci, index=data.index)
+
+## Volume
+
 def on_balance_volume(data):
     close = data['Adj Close'].values
     volume = data['Volume'].values
@@ -88,19 +107,7 @@ def on_balance_volume(data):
         else:
             obv.append(obv[-1]) 
     return pd.Series(obv, index=data.index)
-
-def average_true_range(data, atr_period=14):
-    
-    atr = ta.volatility.AverageTrueRange(high = data['High'], low = data['Low'], close = data['Adj Close'], window=atr_period).average_true_range()
-    print(atr)
-    
-    return pd.Series(atr, index=data.index)
-
-def commodity_channel_index(data, cci_period=20):
-    
-    cci = ta.trend.CCIIndicator(high = data['High'], low = data['Low'], close = data['Adj Close'], window=cci_period).cci()
-    
-    return pd.Series(cci, index=data.index)
+## Oscilators
 
 def bollinger_bands(data, bb_period=20, num_std=2):
 
@@ -112,7 +119,7 @@ def bollinger_bands(data, bb_period=20, num_std=2):
     # Return a DataFrame with SMA, Upper Band, and Lower Band
     return data[['EMA', 'Upper Band', 'Lower Band']]
 
-
+## Processing
 def agg_indicators(data):
     data["ADX"] = ADX(data)
     data["Parabolic Sar"] = parabolic_sar(data)
@@ -125,9 +132,6 @@ def agg_indicators(data):
     data['STC'] = schaff_trend_cycle(data)
     data[['Tenkan-sen', 'Kijun-sen', 'Senkou Span A', 'Senkou Span B']] = ichimoku_cloud(data)
     data[['KST', 'KST Signal', 'KST Diff']] = kst_oscillator(data)
-
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 def plot_distributions(data, bins=30, kde=True, figsize=(15, 20)):
     """
@@ -145,7 +149,7 @@ def plot_distributions(data, bins=30, kde=True, figsize=(15, 20)):
     num_columns = len(data.columns)
     num_rows = (num_columns + 1) // 2  # Arrange plots in a grid with 2 columns
     
-    fig, axes = plt.subplots(num_rows, 2, figsize=figsize)
+    fig, axes = plt.subplots(num_rows, 2, figsize=(20, 100))
     axes = axes.flatten()  # Flatten the axes array for easy iteration
 
     for i, column in enumerate(data.columns):
@@ -161,11 +165,21 @@ def plot_distributions(data, bins=30, kde=True, figsize=(15, 20)):
     plt.tight_layout()
     plt.show()
 
+def normalize_indicators(data):
+    # Cria uma cópia para evitar mudanças no DataFrame original
+    data_normalized = data.copy().astype(float)
+    
+    # Inicializa o MinMaxScaler
+    scaler = StandardScaler()
+    
+    # Ajusta o scaler e transforma os dados
+    data_normalized.iloc[:, :] = scaler.fit_transform(data)
+    
+    return data_normalized
+
 data = tsla_data.copy()
 agg_indicators(data)
-plot_distributions(data)
-def adj_data(data):
-    data = data.iloc[:, 6:]
-    data.to_numpy()
+normalized_data = normalize_indicators(data)
+
 
 
