@@ -112,18 +112,6 @@ def bollinger_bands(data, bb_period=20, num_std=2):
     return ema, upper_band, lower_band
 
 ## Processing
-def agg_indicators(data):
-    data["ADX"] = ADX(data)
-    data["Parabolic Sar"] = parabolic_sar(data)
-    data['OBV'] = on_balance_volume(data)
-    data['ATR'] = average_true_range(data)
-    data['CCI'] = commodity_channel_index(data)
-    data[['EMA','Upper Band', 'Lower Band']] = bollinger_bands(data)
-    data[['MACD Line', 'Signal Line', 'MACD Histogram']] = MACD(data)
-    data[['Aroon Up', 'Aroon Down', 'Aroon Oscillator']] = aroon_indicator(data)
-    data['STC'] = schaff_trend_cycle(data)
-    data[['Tenkan-sen', 'Kijun-sen', 'Senkou Span A', 'Senkou Span B']] = ichimoku_cloud(data)
-    data[['KST', 'KST Signal', 'KST Diff']] = kst_oscillator(data)
 
 def agg_indicators1(data):
     adx = ADX(data)
@@ -208,11 +196,11 @@ def normalize_indicators(data):
     return data_normalized
 
 data = tsla_data.copy()
-agg_indicators(data)
+data = agg_indicators1(data)
 normalized_data = normalize_indicators(data)
-
+print(normalized_data)
 # agg_indicators(data)
-plot_distributions(data)
+plot_distributions(normalized_data)
 def adj_data(data):
     data = data.iloc[:, 6:]
     data.to_numpy()
