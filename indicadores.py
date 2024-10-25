@@ -105,6 +105,7 @@ def on_balance_volume(data):
         else:
             obv.append(obv[-1]) 
     return pd.Series(obv, index=data.index)
+
 ## Oscilators
 
 def average_true_range(data, atr_period=14):
@@ -253,12 +254,12 @@ def normalize_indicators(data):
     
     return data_normalized
 
-data = tsla_data.copy()
-data = agg_indicators(data)
-normalized_data = normalize_indicators(data)
-print(normalized_data)
+# data = tsla_data.copy()
+# data = agg_indicators(data)
+# normalized_data = normalize_indicators(data)
+# print(normalized_data)
 # agg_indicators(data)
-plot_distributions(normalized_data)
-def adj_data(data):
-    data = data.iloc[:, 6:]
-    data.to_numpy()
+# plot_distributions(normalized_data)
+# def adj_data(data):
+#     data = data.iloc[:, 6:]
+#     data.to_numpy()
