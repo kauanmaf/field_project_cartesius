@@ -111,9 +111,26 @@ def bollinger_bands(data, bb_period=20, num_std=2):
     # Return a DataFrame with SMA, Upper Band, and Lower Band
     return ema, upper_band, lower_band
 
+def vortex(data, window = 14):
+    vi_pos = ta.trend.VortexIndicator(data["High"], data["Low"], data["Adj Close"], window).vortex_indicator_pos()
+    vi_neg = ta.trend.VortexIndicator(data["High"], data["Low"], data["Adj Close"], window).vortex_indicator_neg()
+    return pd.Series(vi_pos, index = data.index), pd.Series(vi_neg, index = data.index)
+
+def trix(data, window = 15):
+    ti = ta.trend.trix(data["Adj Close"], window)
+    return ti
+
+def mass(data, window_fast = 9, window_slow = 25):
+    mi = ta.trend.MassIndex(data["High"], data["Low"], window_fast, window_slow).mass_index()
+    return mi
+
+def detrended_price(data, window = 20):
+    dpo = ta.trend.DPOIndicator(data["Adj Close"], window).dpo()
+    return dpo
+
 ## Processing
 
-def agg_indicators1(data):
+def agg_indicators(data):
     adx = ADX(data)
     psar = parabolic_sar(data)
     obv = on_balance_volume(data)
@@ -125,6 +142,10 @@ def agg_indicators1(data):
     stc = schaff_trend_cycle(data)
     tenkan_sen, kijun_sen, senkou_span_a, senkou_span_b = ichimoku_cloud(data)
     kst, kst_signal, kst_diff = kst_oscillator(data)
+    vi_pos, vi_neg = vortex(data)
+    ti = trix(data)
+    mi = mass(data)
+    dpo = detrended_price(data)
 
     indicators_df = pd.DataFrame({"ADX": adx,
                                   "Parabolic SAR": psar,
@@ -147,7 +168,12 @@ def agg_indicators1(data):
                                   "Senkou Span B": senkou_span_b,
                                   "KST": kst,
                                   "KST Signal": kst_signal,
-                                  "KST Diff": kst_diff})
+                                  "KST Diff": kst_diff,
+                                  "Positive Vortex": vi_pos,
+                                  "Negative Vortex": vi_neg,
+                                  "Trix": ti,
+                                  "Mass": mi,
+                                  "DPO": dpo})
     
     return indicators_df
 
@@ -196,7 +222,7 @@ def normalize_indicators(data):
     return data_normalized
 
 data = tsla_data.copy()
-data = agg_indicators1(data)
+data = agg_indicators(data)
 normalized_data = normalize_indicators(data)
 print(normalized_data)
 # agg_indicators(data)
