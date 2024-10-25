@@ -134,18 +134,24 @@ h = 5
 
 # Calcula desvio padrão móvel ponderado exponencialmente (EWMSD).
 returns_series = pd.Series(returns)
+"""
 print("returns_series")
 print(returns_series)
+"""
 returns_series = returns_series.ewm(span = h).std()
+"""
 print("returns_series")
 print(returns_series)
+"""
 
+"""
 print(list(returns_series[:10]))
 print("returns_series[:10]")
 print(list(returns_series[11:20]))
 print("returns_series[11:20]")
 print(list(returns_series[21:30]))
 print("returns_series[21:30]")
+"""
 
 # labels = fixed_time_horizon_labeling(returns, h, tau)
 
