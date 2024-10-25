@@ -71,6 +71,24 @@ def commodity_channel_index(data, cci_period=20):
     
     return pd.Series(cci, index=data.index)
 
+def vortex(data, window = 14):
+    vi_pos = ta.trend.VortexIndicator(data["High"], data["Low"], data["Adj Close"], window).vortex_indicator_pos()
+    vi_neg = ta.trend.VortexIndicator(data["High"], data["Low"], data["Adj Close"], window).vortex_indicator_neg()
+    return pd.Series(vi_pos, index = data.index), pd.Series(vi_neg, index = data.index)
+
+def trix(data, window = 15):
+    ti = ta.trend.trix(data["Adj Close"], window)
+    return ti
+
+def mass(data, window_fast = 9, window_slow = 25):
+    mi = ta.trend.MassIndex(data["High"], data["Low"], window_fast, window_slow).mass_index()
+    return mi
+
+def detrended_price(data, window = 20):
+    dpo = ta.trend.DPOIndicator(data["Adj Close"], window).dpo()
+    return dpo
+
+
 ## Volume
 
 def on_balance_volume(data):
@@ -111,22 +129,18 @@ def bollinger_bands(data, bb_period=20, num_std=2):
     # Return a DataFrame with SMA, Upper Band, and Lower Band
     return ema, upper_band, lower_band
 
-def vortex(data, window = 14):
-    vi_pos = ta.trend.VortexIndicator(data["High"], data["Low"], data["Adj Close"], window).vortex_indicator_pos()
-    vi_neg = ta.trend.VortexIndicator(data["High"], data["Low"], data["Adj Close"], window).vortex_indicator_neg()
-    return pd.Series(vi_pos, index = data.index), pd.Series(vi_neg, index = data.index)
+def stochastic_rsi(data, rsi_period=14, stoch_period=14, smooth1=3, smooth2=3):
 
-def trix(data, window = 15):
-    ti = ta.trend.trix(data["Adj Close"], window)
-    return ti
+    rsi = ta.momentum.RSIIndicator(close=data['Adj Close'], window=rsi_period).rsi()
+    stoch_rsi = (rsi - rsi.rolling(window=stoch_period).min()) / (rsi.rolling(window=stoch_period).max() - rsi.rolling(window=stoch_period).min())
+    stoch_rsi_k = stoch_rsi.rolling(window=smooth1).mean()
+    stoch_rsi_d = stoch_rsi_k.rolling(window=smooth2).mean()
 
-def mass(data, window_fast = 9, window_slow = 25):
-    mi = ta.trend.MassIndex(data["High"], data["Low"], window_fast, window_slow).mass_index()
-    return mi
+    return stoch_rsi_k, stoch_rsi_d
 
-def detrended_price(data, window = 20):
-    dpo = ta.trend.DPOIndicator(data["Adj Close"], window).dpo()
-    return dpo
+def stochastic_oscillator(data, stoch_period=14, smooth_k=3, smooth_d=3):
+    stoch = ta.momentum.StochasticOscillator(high=data['High'], low=data['Low'], close=data['Adj Close'], window=stoch_period, smooth_window=smooth_k)
+    return stoch.stoch(), stoch.stoch_signal()
 
 ## Processing
 
@@ -146,6 +160,9 @@ def agg_indicators(data):
     ti = trix(data)
     mi = mass(data)
     dpo = detrended_price(data)
+    stoch_rsi_k, stoch_rsi_d = stochastic_rsi(data)
+    sto_osc, sto_sig = stochastic_oscillator(data)
+
 
     indicators_df = pd.DataFrame({"ADX": adx,
                                   "Parabolic SAR": psar,
@@ -173,7 +190,11 @@ def agg_indicators(data):
                                   "Negative Vortex": vi_neg,
                                   "Trix": ti,
                                   "Mass": mi,
-                                  "DPO": dpo})
+                                  "DPO": dpo,
+                                  "stoch_rsi_k": stoch_rsi_k, 
+                                  "stoch_rsi_d": stoch_rsi_d,
+                                  "stoch_osc": sto_osc, 
+                                  "stoch_osc_sig": sto_sig})
     
     return indicators_df
 
