@@ -71,8 +71,13 @@ def run_signal_policy(tsla_data, policy_function, policy_name, body=None, exec_b
     exit_points(tsla_data, policy, 5, 1)
 
     # Adicionando uma coluna sinal
+    # Ensure 'Signal' column is float before assignment
+
+
     tsla_data["Signal"] = 0
-    tsla_data.loc[policy.index, "Signal"] = policy
+    tsla_data['Signal'] = tsla_data['Signal'].astype(float)
+    tsla_data.loc[policy.index, "Signal"] = policy.astype(float)
+
 
     # Rodando o backtest
     if exec_back:
