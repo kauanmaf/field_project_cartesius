@@ -16,7 +16,7 @@ def labelData(data, max_variation):
             # Check for downward variation
             elif close_next < close_current and (close_current - close_next) * 100 / close_current >= max_variation:
                 label[row] = -1
-           
+        
         except:
             pass
 
@@ -89,25 +89,47 @@ def fixed_time_horizon_labeling(returns, h, tau):
             - 0 se o valor absoluto do retorno nos próximos `h` dias é menor ou igual a `tau`.
             - -1 se o retorno nos próximos `h` dias é menor que`tau`.
         O comprimento de `labels` será `len(returns) - h` para considerar o intervalo dos primeiros `h` dias.
-    """
+    """    
     labels = np.zeros(len(returns) - h)
-
-    for i in range(len(returns) - h):
-        # Calcula o retorno cumulativo dos próximos h dias.
-        cumulative_return = np.sum(returns[i:i + h])
-        
-        # Define o rótulo de acordo com o limiar.
-        if cumulative_return > tau:
-            labels[i] = 1
-        elif abs(cumulative_return) <= tau:
-            labels[i] = 0
+    
+    # Limiares
+    print("tipo do tau:")
+    print(type(tau))
+    # Se tivermos um array de limiares, usamos o limiar definido com ewm
+    
+    try:
+        if isinstance(np.array, tau) or isinstance(pd.Series, tau):
+            for i in range(len(returns) - h):
+                # Calcula o retorno cumulativo dos próximos h dias.
+                cumulative_return = np.sum(returns[i:i + h])
+                
+                # Define o rótulo de acordo com o limiar.
+                if cumulative_return > tau[i]:
+                    labels[i] = 1
+                elif abs(cumulative_return) <= tau[i]:
+                    labels[i] = 0
+                else:
+                    labels[i] = -1
+        # Senão, usamos o limiar fixo durante toda a rotulagem.
         else:
-            labels[i] = -1
-
+            for i in range(len(returns) - h):
+                # Calcula o retorno cumulativo dos próximos h dias.
+                cumulative_return = np.sum(returns[i:i + h])
+                
+                # Define o rótulo de acordo com o limiar.
+                if cumulative_return > tau:
+                    labels[i] = 1
+                elif abs(cumulative_return) <= tau:
+                    labels[i] = 0
+                else:
+                    labels[i] = -1
+    except:
+        print("ERRO: tau precisa ser um inteiro, um array ou uma Series")
+        
     return labels
 
 # Função só pra ter uma ideia do calculao pra volatilidade diária.
-def getDailyVol(close,span0=50):
+def getDailyVol(close,span0=5):
     # daily vol, reindexed to close
     df0=close.index.searchsorted(close.index-pd.Timedelta(days=1))
     df0=df0[df0>0]
@@ -116,52 +138,48 @@ def getDailyVol(close,span0=50):
     
     return df0
 
-
 # Selecionando apenas preços Adj_Close
 prices = tsla_data["Adj Close"].to_numpy()
 
 # Calculando retorno logaritmico na série de preços.
 returns = log_returns(prices)
-# print("returns")
-# print(returns)
-# print("returns.shape")
-# print(returns.shape)
 
 # Limiar para definir rótulo.
 tau = np.std(returns)
+
 # Intervalo de dias a se considerar
 h = 5
 
 # Calcula desvio padrão móvel ponderado exponencialmente (EWMSD).
 returns_series = pd.Series(returns)
-"""
-print("returns_series")
-print(returns_series)
-"""
-returns_series = returns_series.ewm(span = h).std()
-"""
-print("returns_series")
-print(returns_series)
-"""
+dynamic_tau = returns_series.ewm(span = h).std()
 
-"""
-print(list(returns_series[:10]))
-print("returns_series[:10]")
-print(list(returns_series[11:20]))
-print("returns_series[11:20]")
-print(list(returns_series[21:30]))
-print("returns_series[21:30]")
-"""
-
-# labels = fixed_time_horizon_labeling(returns, h, tau)
-
-# print("labels")
-# print(labels)
-# print("labels.shape")
-# print(labels.shape)
+labels = fixed_time_horizon_labeling(returns, h, tau)
+labels_dynamic = fixed_time_horizon_labeling(returns, h, dynamic_tau)
 
 label_tsla_data = labelData(tsla_data, 0.1)
-# print(label_tsla_data)
-# # print(label_tsla_data[label_tsla_data == 1].shape)
-# # print(label_tsla_data[label_tsla_data == -1].shape)
-# # print(label_tsla_data[label_tsla_data == 0].shape)
+
+if __name__ == "__main__":
+    def iguais():
+        print(50 * "=")
+    
+    iguais()
+    print("prices shape:")
+    print(prices.shape)
+    
+    iguais()
+    print("returns shape:")
+    print(returns.shape)
+    
+    iguais()
+    print("returns_series shape:")
+    print(returns_series.shape)
+
+    iguais()
+    print("labels com limiar igual ao desvio padrao")
+    print(labels)
+    print(labels.shape)
+    print("labels com limiar dinamico com ewmsd")
+    print(labels_dynamic)
+    print(labels_dynamic.shape)
+
