@@ -275,7 +275,7 @@ def decorrelate(data_normalized, limite_correlacao = 0.8, show_graphs = False, k
                 remove["biggest_sum"] = correlation_sum
                 remove["column"] = column
         # If no columns exceed the threshold, break the loop
-        if remove["column"] is None or matriz_corr.shape[0] < 15:
+        if remove["column"] is None or matriz_corr.shape[0] < k_best:
             break
         # Add the column to the drop list and remove it from the correlation matrix
         columns_to_drop.append(remove["column"])
