@@ -140,8 +140,8 @@ def labelData(data, span=5):
     # Calcula desvio padrão móvel ponderado exponencialmente (EWMSD).
     returns_series = pd.Series(returns)
     dynamic_tau = returns_series.ewm(span = span).std()
-
     labels_dynamic = fixed_time_horizon_labeling(returns, span, dynamic_tau)
+    labels_dynamic = np.concatenate((np.zeros(6), labels_dynamic))
 
     return labels_dynamic
     

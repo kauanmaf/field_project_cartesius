@@ -309,4 +309,4 @@ data = tsla_data.copy()
 
 data = agg_indicators(data)
 normalized_data = normalize_indicators(data)
-new_indicators = decorrelate(data, show_graphs=True)
+new_indicators = decorrelate(data, show_graphs=False)
