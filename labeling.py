@@ -1,27 +1,6 @@
 import numpy as np
 from tradingUtils import *
 
-def labelData(data, max_variation):
-    label = np.zeros((data.shape[0], 1))
-    
-    for row in range(data.shape[0] - 1):
-        try:
-            
-            close_current = data.iloc[row]["Adj Close"]
-            close_next = data.iloc[row + 1]["Adj Close"]
-
-            # Check for upward variation
-            if close_next > close_current and (close_next - close_current) * 100 / close_current >= max_variation:
-                label[row] = 1
-            # Check for downward variation
-            elif close_next < close_current and (close_current - close_next) * 100 / close_current >= max_variation:
-                label[row] = -1
-        
-        except:
-            pass
-
-    return label
-
 def log_returns(prices):
     """
     Calcula o retorno de uma sequência de preços.
@@ -138,28 +117,38 @@ def getDailyVol(close,span0=5):
     return df0
 
 # Selecionando apenas preços Adj_Close
-prices = tsla_data["Adj Close"].to_numpy()
+# prices = tsla_data["Adj Close"].to_numpy()
 
-# Calculando retorno logaritmico na série de preços.
-returns = log_returns(prices)
+# # Calculando retorno logaritmico na série de preços.
+# returns = log_returns(prices)
 
-# Limiar para definir rótulo.
-tau = np.std(returns)
+# # Limiar para definir rótulo.
+# tau = np.std(returns)
 
-# Intervalo de dias a se considerar
-h = 5
+# # Intervalo de dias a se considerar
+# h = 5
 
-# Calcula desvio padrão móvel ponderado exponencialmente (EWMSD).
-returns_series = pd.Series(returns)
-dynamic_tau = returns_series.ewm(span = h).std()
+# # Calcula desvio padrão móvel ponderado exponencialmente (EWMSD).
+# returns_series = pd.Series(returns)
+# dynamic_tau = returns_series.ewm(span = h).std()
 
-labels = fixed_time_horizon_labeling(returns, h, tau)
-labels_dynamic = fixed_time_horizon_labeling(returns, h, dynamic_tau)
+# labels = fixed_time_horizon_labeling(returns, h, tau)
+# labels_dynamic = fixed_time_horizon_labeling(returns, h, dynamic_tau)
 
-label_tsla_data = labelData(tsla_data, 0.1)
 
-def label_data(data, span):
+def labelData(data, span=5):
+    # Calculando retorno logaritmico da série de preços.
+    returns = log_returns(data)
+
+    # Calcula desvio padrão móvel ponderado exponencialmente (EWMSD).
+    returns_series = pd.Series(returns)
+    dynamic_tau = returns_series.ewm(span = h).std()
+
+    labels_dynamic = fixed_time_horizon_labeling(returns, span, dynamic_tau)
+
+    return labels_dynamic
     
+label_tsla_data = labelData(tsla_data)
 
 if __name__ == "__main__":
     def iguais(num):
