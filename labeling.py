@@ -92,13 +92,11 @@ def fixed_time_horizon_labeling(returns, h, tau):
     """    
     labels = np.zeros(len(returns) - h)
     
-    # Limiares
-    print("tipo do tau:")
-    print(type(tau))
-    # Se tivermos um array de limiares, usamos o limiar definido com ewm
     
+    # Limiares
+    # Se tivermos um array de limiares, usamos o limiar definido com ewm
     try:
-        if isinstance(np.array, tau) or isinstance(pd.Series, tau):
+        if isinstance(tau, type(np.array([1]))) or isinstance(tau, type(pd.Series([1]))):
             for i in range(len(returns) - h):
                 # Calcula o retorno cumulativo dos próximos h dias.
                 cumulative_return = np.sum(returns[i:i + h])
@@ -123,8 +121,9 @@ def fixed_time_horizon_labeling(returns, h, tau):
                     labels[i] = 0
                 else:
                     labels[i] = -1
-    except:
-        print("ERRO: tau precisa ser um inteiro, um array ou uma Series")
+    except Exception as e:
+        print("Tau precisa ser um inteiro, um array ou uma Series")
+        print(f"Mensagem de erro: {e}")
         
     return labels
 
@@ -159,27 +158,49 @@ labels_dynamic = fixed_time_horizon_labeling(returns, h, dynamic_tau)
 
 label_tsla_data = labelData(tsla_data, 0.1)
 
-if __name__ == "__main__":
-    def iguais():
-        print(50 * "=")
+def label_data(data, span):
     
-    iguais()
-    print("prices shape:")
-    print(prices.shape)
-    
-    iguais()
-    print("returns shape:")
-    print(returns.shape)
-    
-    iguais()
-    print("returns_series shape:")
-    print(returns_series.shape)
 
-    iguais()
+if __name__ == "__main__":
+    def iguais(num):
+        print(num * "=")
+
+    def iguais_emvolta(num, txt):
+        print(num * "=" + txt + num * "=")
+    
+    # iguais(30)
+    # print("prices shape:")
+    # print(prices.shape)
+    
+    # iguais(30)
+    # print("returns shape:")
+    # print(returns.shape)
+    
+    # iguais(30)
+    # print("dynamic_tau shape:")
+    # print(dynamic_tau.shape)
+
+    iguais(30)
     print("labels com limiar igual ao desvio padrao")
     print(labels)
     print(labels.shape)
     print("labels com limiar dinamico com ewmsd")
     print(labels_dynamic)
     print(labels_dynamic.shape)
+
+    iguais(30)
+    print("contagem de labels")
+    iguais_emvolta(10, "Labels com tau fixo (desvio padrão)")
+    unique_values, count = np.unique(labels, return_counts = True)
+    print("unique_values")
+    print(unique_values)
+    print("count")
+    print(count)
+
+    iguais_emvolta(10, "Labels com tau dinamico")
+    unique_values, count = np.unique(labels_dynamic, return_counts = True)
+    print("unique_values")
+    print(unique_values)
+    print("count")
+    print(count)
 
