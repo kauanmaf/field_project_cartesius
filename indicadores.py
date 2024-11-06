@@ -1,4 +1,4 @@
-import numpy as numpy
+import numpy as np
 import pandas as pd
 from tradingUtils import *
 import ta
@@ -251,15 +251,62 @@ def normalize_indicators(data):
     
     # Ajusta o scaler e transforma os dados
     data_normalized.iloc[:, :] = scaler.fit_transform(data)
-    
+  
     return data_normalized
 
-# data = tsla_data.copy()
-# data = agg_indicators(data)
-# normalized_data = normalize_indicators(data)
-# print(normalized_data)
-# agg_indicators(data)
-# plot_distributions(normalized_data)
-# def adj_data(data):
-#     data = data.iloc[:, 6:]
-#     data.to_numpy()
+def decorrelate(data_normalized, limite_correlacao = 0.8, show_graphs = False, k_best = 15):
+    # Calcular a matriz de correlação
+    correlation_matrix = data_normalized.corr()
+
+    columns_to_drop = []
+    # Calcule a matriz de correlação
+    matriz_corr = correlation_matrix.abs()  # Pegue valores absolutos para facilitar a comparação
+    matriz_corr_for = matriz_corr.copy()
+    np.fill_diagonal(matriz_corr_for.values, 0)
+
+    while True:
+        remove = {"biggest_sum": 0, "column": None}
+        for column in matriz_corr.columns:
+            
+            # Sum correlations for this column that are above the threshold
+            correlation_sum = matriz_corr_for[column][matriz_corr_for[column] > limite_correlacao].sum()
+            
+            if correlation_sum > remove["biggest_sum"]:
+                remove["biggest_sum"] = correlation_sum
+                remove["column"] = column
+        # If no columns exceed the threshold, break the loop
+        if remove["column"] is None or matriz_corr.shape[0] < k_best:
+            break
+        # Add the column to the drop list and remove it from the correlation matrix
+        columns_to_drop.append(remove["column"])
+        matriz_corr.drop(columns=remove["column"], inplace=True)
+        matriz_corr.drop(index=remove["column"], inplace=True)
+
+    data_descor = data_normalized.drop(columns=columns_to_drop)
+
+    corr_novo = data_descor.corr()
+    # Plotar a matriz de correlação usando um heatmap
+    if show_graphs:
+        plt.figure(figsize=(10, 16))  # Aumenta a altura para acomodar os dois gráficos
+
+        # Primeiro gráfico
+        plt.subplot(2, 1, 1)  # 2 linhas, 1 coluna, 1ª posição
+        sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', vmin=-1, vmax=1, annot_kws={"size": 4})
+        plt.title("Matriz de Correlação 1")
+
+        # Segundo gráfico
+        plt.subplot(2, 1, 2)  # 2 linhas, 1 coluna, 2ª posição
+        sns.heatmap(corr_novo, annot=True, cmap='coolwarm', vmin=-1, vmax=1, annot_kws={"size": 4})
+        plt.title("Matriz de Correlação 2")
+
+        plt.tight_layout()  # Ajusta o espaçamento para evitar sobreposição
+        plt.show()
+    
+    return data_descor
+    
+
+data = tsla_data.copy()
+
+data = agg_indicators(data)
+normalized_data = normalize_indicators(data)
+new_indicators = decorrelate(data, show_graphs=True)
