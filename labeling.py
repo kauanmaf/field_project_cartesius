@@ -142,7 +142,11 @@ def labelData(data, span=5):
     # Calcula desvio padrão móvel ponderado exponencialmente (EWMSD).
     returns_series = pd.Series(returns)
     dynamic_tau = returns_series.ewm(span = span).std()
+    
+    # Calcula labels de acordo usando método do horizonte de tempo fixado e os limiares dinâmicos.
     labels_dynamic = fixed_time_horizon_labeling(returns, span, dynamic_tau)
+    
+    # Adiciona zeros no começo para compensar os cinco primeiros dias.
     labels_dynamic = np.concatenate((np.zeros(6), labels_dynamic))
 
     return labels_dynamic
@@ -159,9 +163,9 @@ if __name__ == "__main__":
     def iguais_emvolta(num, txt):
         print(num * "=" + txt + num * "=")
     
-    # iguais(30)
-    # print("prices shape:")
-    # print(prices.shape)
+    iguais(30)
+    print("prices shape:")
+    print(prices.shape)
     
     iguais(30)
     print("returns shape:")
@@ -190,6 +194,8 @@ if __name__ == "__main__":
 
     iguais_emvolta(10, "Labels com tau dinamico")
     unique_values, count = np.unique(labels_dynamic, return_counts = True)
+    print("labels_dynamic.shape")
+    print(labels_dynamic.shape)
     print("unique_values")
     print(unique_values)
     print("count")
