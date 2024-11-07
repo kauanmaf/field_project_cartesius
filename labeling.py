@@ -116,21 +116,23 @@ def getDailyVol(close,span0=5):
     
     return df0
 
+prices = tsla_data["Adj Close"].to_numpy()
+
 # # Calculando retorno logaritmico na série de preços.
-# returns = log_returns(prices)
+returns = log_returns(prices)
 
-# # Limiar para definir rótulo.
-# tau = np.std(returns)
+# Limiar para definir rótulo.
+tau = np.std(returns)
 
-# # Intervalo de dias a se considerar
-# h = 5
+# Intervalo de dias a se considerar
+h = 5
 
-# # Calcula desvio padrão móvel ponderado exponencialmente (EWMSD).
-# returns_series = pd.Series(returns)
-# dynamic_tau = returns_series.ewm(span = h).std()
+# Calcula desvio padrão móvel ponderado exponencialmente (EWMSD).
+returns_series = pd.Series(returns)
+dynamic_tau = returns_series.ewm(span = h).std()
 
-# labels = fixed_time_horizon_labeling(returns, h, tau)
-# labels_dynamic = fixed_time_horizon_labeling(returns, h, dynamic_tau)
+labels = fixed_time_horizon_labeling(returns, h, tau)
+labels_dynamic = fixed_time_horizon_labeling(returns, h, dynamic_tau)
 
 
 def labelData(data, span=5):
@@ -161,13 +163,13 @@ if __name__ == "__main__":
     # print("prices shape:")
     # print(prices.shape)
     
-    # iguais(30)
-    # print("returns shape:")
-    # print(returns.shape)
+    iguais(30)
+    print("returns shape:")
+    print(returns.shape)
     
-    # iguais(30)
-    # print("dynamic_tau shape:")
-    # print(dynamic_tau.shape)
+    iguais(30)
+    print("dynamic_tau shape:")
+    print(dynamic_tau.shape)
 
     # iguais(30)
     # print("labels com limiar igual ao desvio padrao")
@@ -177,7 +179,7 @@ if __name__ == "__main__":
     # print(labels_dynamic)
     # print(labels_dynamic.shape)
 
-    # iguais(30)
+    iguais(30)
     # print("contagem de labels")
     # iguais_emvolta(10, "Labels com tau fixo (desvio padrão)")
     # unique_values, count = np.unique(labels, return_counts = True)
@@ -186,11 +188,14 @@ if __name__ == "__main__":
     # print("count")
     # print(count)
 
-    # iguais_emvolta(10, "Labels com tau dinamico")
-    # unique_values, count = np.unique(labels_dynamic, return_counts = True)
-    # print("unique_values")
-    # print(unique_values)
-    # print("count")
-    # print(count)
+    iguais_emvolta(10, "Labels com tau dinamico")
+    unique_values, count = np.unique(labels_dynamic, return_counts = True)
+    print("unique_values")
+    print(unique_values)
+    print("count")
+    print(count)
 
+    print("label_tsla_data")
     print(label_tsla_data)
+    print("label_tsla_data.shape")
+    print(label_tsla_data.shape)
