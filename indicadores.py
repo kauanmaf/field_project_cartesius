@@ -153,60 +153,101 @@ def awesome(data, window1 = 5, window2 = 34):
 
 ## Processing
 
-def agg_indicators(data):
-    adx = ADX(data)
-    psar = parabolic_sar(data)
+def agg_indicators(
+    data,
+    adx_period=14,
+    psar_acceleration=0.02,
+    psar_max_acceleration=0.2,
+    atr_period=14,
+    cci_period=20,
+    bb_period=20,
+    bb_num_std=2,
+    macd_fast=12,
+    macd_slow=26,
+    macd_signal=9,
+    aroon_period=25,
+    stc_window_slow=50,
+    stc_window_fast=23,
+    stc_cycle=10,
+    stc_smooth1=3,
+    stc_smooth2=3,
+    ichimoku_tenkan=9,
+    ichimoku_kijun=26,
+    ichimoku_senkou_span_b=52,
+    kst_r1=10, kst_r2=15, kst_r3=20, kst_r4=30,
+    kst_n1=10, kst_n2=10, kst_n3=10, kst_n4=15,
+    kst_signal=9,
+    vortex_window=14,
+    trix_window=15,
+    mass_window_fast=9,
+    mass_window_slow=25,
+    dpo_window=20,
+    stoch_rsi_period=14,
+    stoch_period=14,
+    stoch_smooth1=3,
+    stoch_smooth2=3,
+    sto_period=14,
+    sto_smooth_k=3,
+    sto_smooth_d=3,
+    rsi_window=14,
+    awesome_window1=5,
+    awesome_window2=34
+):
+    adx = ADX(data, adx_period=adx_period)
+    psar = parabolic_sar(data, acceleration=psar_acceleration, max_acceleration=psar_max_acceleration)
     obv = on_balance_volume(data)
-    atr = average_true_range(data)
-    cci = commodity_channel_index(data)
-    ema, upper_band, lower_band = bollinger_bands(data)
-    macd_line, signal_line, macd_histogram = MACD(data)
-    aroon_up, aroon_down, aroon_oscilator = aroon_indicator(data)
-    stc = schaff_trend_cycle(data)
-    tenkan_sen, kijun_sen, senkou_span_a, senkou_span_b = ichimoku_cloud(data)
-    kst, kst_signal, kst_diff = kst_oscillator(data)
-    vi_pos, vi_neg = vortex(data)
-    ti = trix(data)
-    mi = mass(data)
-    dpo = detrended_price(data)
-    stoch_rsi_k, stoch_rsi_d = stochastic_rsi(data)
-    sto_osc, sto_sig = stochastic_oscillator(data)
-    rsi = relative_strength(data)
-    ao = awesome(data)
+    atr = average_true_range(data, atr_period=atr_period)
+    cci = commodity_channel_index(data, cci_period=cci_period)
+    ema, upper_band, lower_band = bollinger_bands(data, bb_period=bb_period, num_std=bb_num_std)
+    macd_line, signal_line, macd_histogram = MACD(data, macd_fast=macd_fast, macd_slow=macd_slow, macd_signal=macd_signal)
+    aroon_up, aroon_down, aroon_oscillator = aroon_indicator(data, aroon_period=aroon_period)
+    stc = schaff_trend_cycle(data, window_slow=stc_window_slow, window_fast=stc_window_fast, cycle=stc_cycle, smooth1=stc_smooth1, smooth2=stc_smooth2)
+    tenkan_sen, kijun_sen, senkou_span_a, senkou_span_b = ichimoku_cloud(data, tenkan=ichimoku_tenkan, kijun=ichimoku_kijun, senkou_span_b=ichimoku_senkou_span_b)
+    kst, kst_signal_line, kst_diff = kst_oscillator(data, r1=kst_r1, r2=kst_r2, r3=kst_r3, r4=kst_r4, n1=kst_n1, n2=kst_n2, n3=kst_n3, n4=kst_n4, signal=kst_signal)
+    vi_pos, vi_neg = vortex(data, window=vortex_window)
+    ti = trix(data, window=trix_window)
+    mi = mass(data, window_fast=mass_window_fast, window_slow=mass_window_slow)
+    dpo = detrended_price(data, window=dpo_window)
+    stoch_rsi_k, stoch_rsi_d = stochastic_rsi(data, rsi_period=stoch_rsi_period, stoch_period=stoch_period, smooth1=stoch_smooth1, smooth2=stoch_smooth2)
+    sto_osc, sto_sig = stochastic_oscillator(data, stoch_period=sto_period, smooth_k=sto_smooth_k, smooth_d=sto_smooth_d)
+    rsi = relative_strength(data, window=rsi_window)
+    ao = awesome(data, window1=awesome_window1, window2=awesome_window2)
 
-    indicators_df = pd.DataFrame({"ADX": adx,
-                                  "Parabolic SAR": psar,
-                                  "OBV": obv,
-                                  "ATR": atr,
-                                  "CCI": cci,
-                                  "EMA": ema,
-                                  "Upper Band": upper_band,
-                                  "Lower Band": lower_band,
-                                  "MACD Line": macd_line,
-                                  "Signal Line": signal_line,
-                                  "MACD Histogram": macd_histogram,
-                                  "Aroon Up": aroon_up,
-                                  "Aroon Down": aroon_down,
-                                  "Aroon Oscillator": aroon_oscilator,
-                                  "STC": stc,
-                                  "Tenkan-sen": tenkan_sen,
-                                  "Kijun-sen": kijun_sen,
-                                  "Senkou Span A": senkou_span_a,
-                                  "Senkou Span B": senkou_span_b,
-                                  "KST": kst,
-                                  "KST Signal": kst_signal,
-                                  "KST Diff": kst_diff,
-                                  "Positive Vortex": vi_pos,
-                                  "Negative Vortex": vi_neg,
-                                  "Trix": ti,
-                                  "Mass": mi,
-                                  "DPO": dpo,
-                                  "SRSI-k": stoch_rsi_k, 
-                                  "SRSI-d": stoch_rsi_d,
-                                  "Stochastic Oscillator": sto_osc, 
-                                  "Stochastic Oscillator Signal": sto_sig,
-                                  "RSI": rsi,
-                                  "Awesome": ao})
+    indicators_df = pd.DataFrame({
+        "ADX": adx,
+        "Parabolic SAR": psar,
+        "OBV": obv,
+        "ATR": atr,
+        "CCI": cci,
+        "EMA": ema,
+        "Upper Band": upper_band,
+        "Lower Band": lower_band,
+        "MACD Line": macd_line,
+        "Signal Line": signal_line,
+        "MACD Histogram": macd_histogram,
+        "Aroon Up": aroon_up,
+        "Aroon Down": aroon_down,
+        "Aroon Oscillator": aroon_oscillator,
+        "STC": stc,
+        "Tenkan-sen": tenkan_sen,
+        "Kijun-sen": kijun_sen,
+        "Senkou Span A": senkou_span_a,
+        "Senkou Span B": senkou_span_b,
+        "KST": kst,
+        "KST Signal": kst_signal_line,
+        "KST Diff": kst_diff,
+        "Positive Vortex": vi_pos,
+        "Negative Vortex": vi_neg,
+        "Trix": ti,
+        "Mass": mi,
+        "DPO": dpo,
+        "SRSI-k": stoch_rsi_k, 
+        "SRSI-d": stoch_rsi_d,
+        "Stochastic Oscillator": sto_osc, 
+        "Stochastic Oscillator Signal": sto_sig,
+        "RSI": rsi,
+        "Awesome": ao
+    })
     
     return indicators_df
 

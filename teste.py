@@ -8,8 +8,7 @@ import numpy as np
 from tradingUtils import *
 from indicadores import *
 import labeling as lb
-import backtesting
-from backtesting import Backtest, Strategy
+from backtesting import Backtest
 from backtesting.lib import crossover
 
 DATA = prio_data
@@ -25,7 +24,7 @@ def backtesting_model(olhc, model, year = None, **kwargs):
     # Calculando o rótulo
     y = np.array(lb.labelData(olhc["Adj Close"].to_numpy())).ravel()
     # Eliminando as linhas com NaN
-    print(indicators.shape, y.shape)
+
     indicators["y"] = y
     indicators = indicators.dropna()
     # Separando os dados de treino e backtest com base no ano selecionado
@@ -48,7 +47,7 @@ def backtesting_model(olhc, model, year = None, **kwargs):
     # Salvando a predição em um dataframe adequado (próximas 4 linhas)
     # Pegando os dados originais do período de backtest
     if year:
-        olhc_backtest = olhc[olhc.index.year != year]
+        olhc_backtest = olhc[olhc.index.year == year]
     else:
         last_day = olhc.index[-1]
         olhc_backtest = olhc[olhc.index > last_day - pd.DateOffset(years = 1)]
@@ -93,6 +92,76 @@ def random_forest(data, y, n_estimators=100, max_depth=None, random_state=42):
     print(report)
 
     return rf
+
+def mlp(data, y, hidden_layers=(100, 100, 100), activation='logistic', 
+        solver='adam', max_iter=500, random_state=42):
+    """
+    Treina um modelo de rede neural MLP e retorna as previsões e o relatório de classificação.
+
+    Parâmetros:
+    - data: DataFrame contendo os dados de entrada.
+    - hidden_layers: Tupla com o tamanho das camadas ocultas.
+    - activation: Função de ativação a ser usada.
+    - solver: Algoritmo de otimização a ser usado.
+    - max_iter: Número máximo de iterações.
+    - random_state: Semente para a geração de números aleatórios.
+
+    Retorna:
+    - y_pred_mlp: Previsões das classes no conjunto de teste.
+    - report: Relatório de classificação.
+    """
+    # Divide os dados em conjuntos de treinamento e teste
+    X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=42)
+
+    # Definindo a rede neural com múltiplas camadas
+    mlp = MLPClassifier(hidden_layer_sizes = hidden_layers,
+                        activation = activation,
+                        solver = solver,
+                        max_iter = max_iter,
+                        random_state = random_state)
+
+    # Treina a rede neural
+    mlp.fit(X_train, y_train)
+
+    # Faz previsões de classe
+    y_pred_mlp = mlp.predict(X_test)
+
+    # Exibe o relatório de classificação para o MLP
+    report = classification_report(y_test, y_pred_mlp)
+    print(report)
+
+    return mlp
+
+def gradient_boosting(data, y, random_state=42):
+    """
+    Treina um modelo de Gradient Boosting e retorna as previsões e o relatório de classificação.
+
+    Parâmetros:
+    - data: DataFrame com as features e a variável alvo.
+    - target_column: Nome da coluna alvo no DataFrame.
+    - random_state: Semente para a geração de números aleatórios.
+
+    Retorna:
+    - y_pred_gb: Previsões das classes no conjunto de teste.
+    - report: Relatório de classificação.
+    """
+    # Divide os dados em conjuntos de treinamento e teste
+    X_train, X_test, y_train, y_test = train_test_split(data, y, test_size=0.2, random_state=42)
+
+    # Definindo o modelo Gradient Boosting
+    gb_model = GradientBoostingClassifier(random_state=random_state)
+
+    # Treina o modelo Gradient Boosting
+    gb_model.fit(X_train, y_train)
+
+    # Faz previsões de classe
+    y_pred_gb = gb_model.predict(X_test)
+
+    # Exibe o relatório de classificação para o Gradient Boosting
+    report = classification_report(y_test, y_pred_gb)
+    print(report)
+
+    return gb_model
 
 # Testando o modelo
 dados_rf = backtesting_model(DATA, random_forest, year = YEAR)

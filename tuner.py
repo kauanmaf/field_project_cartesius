@@ -6,8 +6,6 @@ import labeling as lb
 from backtesting import Backtest, Strategy
 import json
 
-data = prio_data
-
 def agg_indicators_tune(
     data,
     adx_period=14,
@@ -205,7 +203,7 @@ def objective(trial):
     # Calculando os indicadores
     indicators = normalize_indicators(indicators)
     # Calculando o rótulo
-    y = np.array(lb.labelData(data, 0.1)).ravel()
+    y = np.array(lb.labelData(data["Adj Close"], 0.1)).ravel()
     # Eliminando as linhas com NaN
     indicators["y"] = y
     indicators = indicators.dropna()
@@ -235,26 +233,22 @@ def objective(trial):
     return score
 
 
-study = optuna.create_study(direction = "maximize")
-study.optimize(objective, n_trials = 100)
+# study = optuna.create_study(direction = "maximize")
+# study.optimize(objective, n_trials = 5)
 
-# Escrevendo o arquivo
-stock_name = "Prio3"
-file_path = os.path.join("params", f"{stock_name}_best_params.json")
-with open(file_path, "w") as f:
-    json.dump(study.best_params, f)
+# # Escrevendo o arquivo
+# stock_name = "Prio3"
+# file_path = os.path.join("params", f"{stock_name}_best_params.json")
+# with open(file_path, "w") as f:
+#     json.dump(study.best_params, f)
 
-# carregando os melhores parametros do arquivo
-file_path = os.path.join("params", f"{stock_name}_best_params.json")
-with open(file_path, "r") as f:
-    best_params = json.load(f)
+# # carregando os melhores parametros do arquivo
+# file_path = os.path.join("params", f"{stock_name}_best_params.json")
+# with open(file_path, "r") as f:
+#     best_params = json.load(f)
 
-## Como utilizar eles?
-# resultado = backtesting_model(olhc, model, year = None, **best_params):
+# ## Como utilizar eles?
+# # resultado = backtesting_model(olhc, model, year = None, **best_params):
 
-
-
-
-
-print("Melhores parâmetros:", study.best_params)
-print("Melhor score:", study.best_value)
+# print("Melhores parâmetros:", study.best_params)
+# print("Melhor score:", study.best_value)
