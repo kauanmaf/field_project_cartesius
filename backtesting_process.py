@@ -8,6 +8,8 @@ def create_indicators(ohlc, **kwargs):
     indicators = agg_indicators(ohlc, **kwargs)
     # Normaliza eles
     indicators = normalize_indicators(indicators)
+    # Retirando indicadores correlacionados
+    indicators = decorrelate(indicators)
 
     return indicators
 

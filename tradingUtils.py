@@ -52,7 +52,6 @@ class OurStrategy(Strategy):
         self.current_signal = None  
 
     def next(self):
-        print(self.data.index[-1], self.stop_loss_triggered, self.data.Signal[-1])
         try:
             if self.stop_loss_triggered and self.data.Signal[-1] == self.current_signal:
                 return  

@@ -111,22 +111,20 @@ def create_objective(ohlc, year):
     
     return objective
 
+# Função que otimiza os hiperparâmetros
 def run_optimization(ohlc, year, n_trials = 100):
+    # Criando o estudo e realizando a otimização
     study = optuna.create_study(direction = "maximize")
     objective = create_objective(ohlc, year)
     study.optimize(objective, n_trials = n_trials)
-    print(study.best_params)
 
-
-
-# study = optuna.create_study(direction = "maximize")
-# study.optimize(objective, n_trials = 5)
-
-# # Escrevendo o arquivo
-# stock_name = "Prio3"
-# file_path = os.path.join("params", f"{stock_name}_best_params.json")
-# with open(file_path, "w") as f:
-#     json.dump(study.best_params, f)
+    # Pegando o nome do dado usado
+    data_name = [name for name, value in globals().items() if value is ohlc]
+    
+    # Escrevendo os hiperparâmetros no JSON adequado
+    file_path = os.path.join("hyperparams", f"{data_name[0]}_{year}.json")
+    with open(file_path, "w") as f:
+        json.dump(study.best_params, f)
 
 # # carregando os melhores parametros do arquivo
 # file_path = os.path.join("params", f"{stock_name}_best_params.json")
