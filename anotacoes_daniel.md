@@ -140,6 +140,7 @@ Function `mpPandasObj` calls a multiprocessing engine, which is explained in dep
 Snippet 3.4 shows one way to define a vertical barrier. For each index in `tEvents`, it finds the timestamp of the next price bar at or immediately after a number of days `numDays`. This vertical barrier can be passed as optional argument t1 in `getEvents`.
 
 SNIPPET 3.4 ADDING A VERTICAL BARRIER
+
 ```python
 t1=close.index.searchsorted(tEvents+pd.Timedelta(days=numDays))
 t1=t1[t1<close.shape[0]]
@@ -152,6 +153,7 @@ Finally, we can label the observations using the getBins function defined in Sni
 - `bin`: The label, {−1, 0, 1}, as a function of the sign of the outcome. The function can be easily adjusted to label as 0 those events when the vertical barrier was touched first, which we leave as an exercise.
 
 SNIPPET 3.5 LABELING FOR SIDE AND SIZE
+
 ```python
 def getBins(events,close):
     #1) prices aligned with events
@@ -165,3 +167,7 @@ def getBins(events,close):
     out['bin']=np.sign(out['ret'])
     return out
 ```
+
+## Futuramente
+Implementar tudo com classes, para um código bem feito
+Quem sabe até criar uma biblioteca?
