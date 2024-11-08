@@ -45,73 +45,72 @@ def exit_points(data, policy, max_window, win_rate):
             elif current_state == -1:
                 policy[date] = -1
 
-class OurStrategy(Strategy):
-    def init(self):
-        pass
-
-    def next(self):
-        try:
-            if self.data.Signal[-1] == 1:
-                if not self.position.is_long:
-                    self.position.close()  # Close any existing short position
-                    self.buy()
-
-            # Sell signal
-            elif self.data.Signal[-1] == -1:
-                if not self.position.is_short:
-                    self.position.close()  # Close any existing long position
-                    self.sell()
-
-            # Close all positions if Signal is 0
-            elif self.data.Signal[-1] == 0:
-                self.position.close()
-        except:
-            pass
-        
 # class OurStrategy(Strategy):
 #     def init(self):
-#         super().init()
-#         # Initialize strategy parameters
-#         self.entry_price = None
-#         self.last_sell_date = None
-#         self.wait_days = 5
-#         self.stop_loss_threshold = 0.95
-        
-        
-#         # Register Signal as a custom indicator
-#         self.signal = self.I(lambda: self.data.Signal)
+#         pass
 
 #     def next(self):
-#         # Get current price
-#         current_price = self.data.Close[-1]
-#         current_signal = self.signal[-1]
-        
-#         # Calculate wait period
-#         if self.last_sell_date is not None:
-#             days_since_sell = (self.data.index[-1] - self.last_sell_date).days
-#             wait_over = days_since_sell >= self.wait_days
-#         else:
-#             wait_over = True
+#         try:
+#             if self.data.Signal[-1] == 1:
+#                 if not self.position.is_long:
+#                     self.position.close()  # Close any existing short position
+#                     self.buy()
 
-#         # Buy signal conditions
-#         if current_signal == 1 and wait_over and not self.position:
-#             self.buy()
-#             self.entry_price = current_price
+#             # Sell signal
+#             elif self.data.Signal[-1] == -1:
+#                 if not self.position.is_short:
+#                     self.position.close()  # Close any existing long position
+#                     self.sell()
 
-#         # Sell signal conditions
-#         elif current_signal == -1 and self.position:
-#             self.position.close()
-#             self.last_sell_date = self.data.index[-1]
-
-#         # Stop-loss check for long positions
-#         elif self.position and self.entry_price is not None:
-#             if current_price <= self.entry_price * self.stop_loss_threshold:
+#             # Close all positions if Signal is 0
+#             elif self.data.Signal[-1] == 0:
 #                 self.position.close()
-#                 self.last_sell_date = self.data.index[-1]
+#         except:
+#             pass
+class OurStrategy(Strategy):
+    def init(self):
+        self.initial_equity = None  # Stores initial equity when opening a position
+        self.stop_loss_triggered = False  # Tracks if stop-loss has been triggered for current position
+        self.current_signal = None  # Stores the last signal to avoid repeated sells
 
-#         # Close positions on neutral signal
-#         elif current_signal == 0 and self.position:
-#             self.position.close()
+    def next(self):
+        print(self.data.index[-1], self.stop_loss_triggered, self.data.Signal[-1])
+        try:
+            # Avoid repeated sell signals if stop-loss was triggered and signal remains the same
+            if self.stop_loss_triggered and self.data.Signal[-1] == self.current_signal:
+                return  
+
+            # Buy Signal
+            if self.data.Signal[-1] == 1 and not self.position.is_long:
+                self.position.close()  # Close any short position
+                self.buy()
+                self.initial_equity = self.equity  # Save initial equity for stop-loss
+                self.stop_loss_triggered = False  # Reset stop-loss on new position
+                self.current_signal = 1
+
+            # Sell Signal
+            elif self.data.Signal[-1] == -1 and not self.position.is_short:
+                self.position.close()  # Close any long position
+                self.sell()
+                self.initial_equity = self.equity  # Save initial equity for stop-loss
+                self.stop_loss_triggered = False  # Reset stop-loss on new position
+                self.current_signal = -1
+
+            # Stop-loss Check (5% drop from initial equity)
+            if self.initial_equity is not None and (self.equity / self.initial_equity - 1) <= -0.05:
+                self.position.close()  # Close position if loss exceeds 5%
+                self.stop_loss_triggered = True  # Mark stop-loss as triggered
+                self.initial_equity = None  # Reset initial equity tracking
+
+            # Neutral Signal: Close any position
+            elif self.data.Signal[-1] == 0:
+                self.position.close()
+                self.initial_equity = None  # Reset initial equity on closing position
+                self.stop_loss_triggered = False  # Reset stop-loss trigger for new trades
+
+        except Exception as e:
+            print(f"Error: {e}")
+
 
 
 def run_signal_policy(tsla_data, policy_function, policy_name, body=None, exec_back = True):
