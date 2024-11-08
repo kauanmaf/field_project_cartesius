@@ -31,10 +31,10 @@ def train_backtest_split(indicators, year = None):
 def adjust_policy_data(ohlc, year, policy):
     # Pegando os dados originais do período de backtest
     if year:
-        ohlc_backtest = ohlc[ohlc.index.year == year]
+        ohlc_backtest = ohlc[ohlc.index.year == year].copy()
     else:
         last_day = ohlc.index[-1]
-        ohlc_backtest = ohlc[ohlc.index > last_day - pd.DateOffset(years = 1)]
+        ohlc_backtest = ohlc[ohlc.index > last_day - pd.DateOffset(years = 1)].copy()
     # Criando uma série com a predição e o index do ano
     policy = pd.Series(policy, index = ohlc_backtest.index)
     # Colocando a predição nesse dataframe

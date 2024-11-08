@@ -13,8 +13,6 @@ def create_objective(ohlc, year):
     def objective(trial):
         # Sugerindo valores para os hiperparâmetros dos indicadores
         adx_period = trial.suggest_int("adx_period", 10, 30)
-        psar_acceleration = trial.suggest_float("psar_acceleration", 0.01, 0.2)
-        psar_max_acceleration = trial.suggest_float("psar_max_acceleration", 0.1, 0.5)
         atr_period = trial.suggest_int("atr_period", 10, 30)
         cci_period = trial.suggest_int("cci_period", 10, 30)
         bb_period = trial.suggest_int("bb_period", 15, 30)
@@ -28,9 +26,6 @@ def create_objective(ohlc, year):
         stc_cycle = trial.suggest_int("stc_cycle", 8, 15)
         stc_smooth1 = trial.suggest_int("stc_smooth1", 2, 5)
         stc_smooth2 = trial.suggest_int("stc_smooth2", 2, 5)
-        ichimoku_tenkan = trial.suggest_int("ichimoku_tenkan", 7, 12)
-        ichimoku_kijun = trial.suggest_int("ichimoku_kijun", 20, 30)
-        ichimoku_senkou_span_b = trial.suggest_int("ichimoku_senkou_span_b", 45, 60)
         kst_r1 = trial.suggest_int("kst_r1", 5, 15)
         kst_r2 = trial.suggest_int("kst_r2", 10, 20)
         kst_r3 = trial.suggest_int("kst_r3", 15, 25)
@@ -60,8 +55,6 @@ def create_objective(ohlc, year):
         # Calculando a política para o dado e ano especificados com os parâmetros a serem testados
         ohlc_backtest = backtesting_model(ohlc, year, n_estimators = n_estimators,
                                           adx_period=adx_period,
-                                          psar_acceleration=psar_acceleration,
-                                          psar_max_acceleration=psar_max_acceleration,
                                           atr_period=atr_period,
                                           cci_period=cci_period,
                                           bb_period=bb_period,
@@ -75,9 +68,6 @@ def create_objective(ohlc, year):
                                           stc_cycle=stc_cycle,
                                           stc_smooth1=stc_smooth1,
                                           stc_smooth2=stc_smooth2,
-                                          ichimoku_tenkan=ichimoku_tenkan,
-                                          ichimoku_kijun=ichimoku_kijun,
-                                          ichimoku_senkou_span_b=ichimoku_senkou_span_b,
                                           kst_r1=kst_r1,
                                           kst_r2=kst_r2,
                                           kst_r3=kst_r3,

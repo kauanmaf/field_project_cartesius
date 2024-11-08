@@ -40,5 +40,5 @@ bt = Backtest(policy, OurStrategy, cash=10000)
 stats = bt.run()
 
 # Exibindo os resultados
-bt.plot()
+bt.plot(title_data = data_name[0])
 print(stats)

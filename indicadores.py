@@ -156,8 +156,6 @@ def awesome(data, window1 = 5, window2 = 34):
 def agg_indicators(
     data,
     adx_period=14,
-    psar_acceleration=0.02,
-    psar_max_acceleration=0.2,
     atr_period=14,
     cci_period=20,
     bb_period=20,
@@ -171,9 +169,6 @@ def agg_indicators(
     stc_cycle=10,
     stc_smooth1=3,
     stc_smooth2=3,
-    ichimoku_tenkan=9,
-    ichimoku_kijun=26,
-    ichimoku_senkou_span_b=52,
     kst_r1=10, kst_r2=15, kst_r3=20, kst_r4=30,
     kst_n1=10, kst_n2=10, kst_n3=10, kst_n4=15,
     kst_signal=9,
@@ -194,7 +189,6 @@ def agg_indicators(
     awesome_window2=34
 ):
     adx = ADX(data, adx_period=adx_period)
-    psar = parabolic_sar(data, acceleration=psar_acceleration, max_acceleration=psar_max_acceleration)
     obv = on_balance_volume(data)
     atr = average_true_range(data, atr_period=atr_period)
     cci = commodity_channel_index(data, cci_period=cci_period)
@@ -202,7 +196,6 @@ def agg_indicators(
     macd_line, signal_line, macd_histogram = MACD(data, macd_fast=macd_fast, macd_slow=macd_slow, macd_signal=macd_signal)
     aroon_up, aroon_down, aroon_oscillator = aroon_indicator(data, aroon_period=aroon_period)
     stc = schaff_trend_cycle(data, window_slow=stc_window_slow, window_fast=stc_window_fast, cycle=stc_cycle, smooth1=stc_smooth1, smooth2=stc_smooth2)
-    tenkan_sen, kijun_sen, senkou_span_a, senkou_span_b = ichimoku_cloud(data, tenkan=ichimoku_tenkan, kijun=ichimoku_kijun, senkou_span_b=ichimoku_senkou_span_b)
     kst, kst_signal_line, kst_diff = kst_oscillator(data, r1=kst_r1, r2=kst_r2, r3=kst_r3, r4=kst_r4, n1=kst_n1, n2=kst_n2, n3=kst_n3, n4=kst_n4, signal=kst_signal)
     vi_pos, vi_neg = vortex(data, window=vortex_window)
     ti = trix(data, window=trix_window)
@@ -215,7 +208,6 @@ def agg_indicators(
 
     indicators_df = pd.DataFrame({
         "ADX": adx,
-        "Parabolic SAR": psar,
         "OBV": obv,
         "ATR": atr,
         "CCI": cci,
@@ -229,10 +221,6 @@ def agg_indicators(
         "Aroon Down": aroon_down,
         "Aroon Oscillator": aroon_oscillator,
         "STC": stc,
-        "Tenkan-sen": tenkan_sen,
-        "Kijun-sen": kijun_sen,
-        "Senkou Span A": senkou_span_a,
-        "Senkou Span B": senkou_span_b,
         "KST": kst,
         "KST Signal": kst_signal_line,
         "KST Diff": kst_diff,
@@ -350,4 +338,4 @@ data = tsla_data.copy()
 
 data = agg_indicators(data)
 normalized_data = normalize_indicators(data)
-new_indicators = decorrelate(data, show_graphs=False)
+new_indicators = decorrelate(data)
