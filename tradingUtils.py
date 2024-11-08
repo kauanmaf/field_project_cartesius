@@ -47,26 +47,42 @@ def exit_points(data, policy, max_window, win_rate):
 
 class OurStrategy(Strategy):
     def init(self):
-        pass
+        self.initial_equity = None 
+        self.stop_loss_triggered = False 
+        self.current_signal = None  
 
     def next(self):
+        print(self.data.index[-1], self.stop_loss_triggered, self.data.Signal[-1])
         try:
-            if self.data.Signal[-1] == 1:
-                if not self.position.is_long:
-                    self.position.close()  # Close any existing short position
-                    self.buy()
+            if self.stop_loss_triggered and self.data.Signal[-1] == self.current_signal:
+                return  
 
-            # Sell signal
-            elif self.data.Signal[-1] == -1:
-                if not self.position.is_short:
-                    self.position.close()  # Close any existing long position
-                    self.sell()
+            if self.data.Signal[-1] == 1 and not self.position.is_long:
+                self.position.close()
+                self.buy()
+                self.initial_equity = self.equity
+                self.stop_loss_triggered = False  
+                self.current_signal = 1
+            
+            elif self.data.Signal[-1] == -1 and not self.position.is_short:
+                self.position.close()  
+                self.sell()
+                self.initial_equity = self.equity  
+                self.stop_loss_triggered = False  
+                self.current_signal = -1
 
-            # Close all positions if Signal is 0
+            if self.initial_equity is not None and (self.equity / self.initial_equity - 1) <= -0.05:
+                self.position.close()
+                self.stop_loss_triggered = True 
+                self.initial_equity = None 
+            
             elif self.data.Signal[-1] == 0:
                 self.position.close()
-        except:
-            pass
+                self.initial_equity = None
+                self.stop_loss_triggered = False
+
+        except Exception as e:
+            print(f"Error: {e}")
 
 
 def run_signal_policy(tsla_data, policy_function, policy_name, body=None, exec_back = True):
