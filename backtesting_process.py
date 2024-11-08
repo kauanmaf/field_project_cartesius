@@ -1,10 +1,11 @@
 from indicadores import *
 from labeling import *
+from models import *
 
 # Função para calcular os indicadores do dado
-def create_indicators(ohlc):
+def create_indicators(ohlc, **kwargs):
     # Calcula e agrega todos os indicadores
-    indicators = agg_indicators(ohlc)
+    indicators = agg_indicators(ohlc, **kwargs)
     # Normaliza eles
     indicators = normalize_indicators(indicators)
 
@@ -24,11 +25,26 @@ def train_backtest_split(indicators, year = None):
 
     return indicators_train, indicators_backtest
 
+# Função para criar um dataframe com os dados de backtest e a política
+def adjust_policy_data(ohlc, year, policy):
+    # Pegando os dados originais do período de backtest
+    if year:
+        ohlc_backtest = ohlc[ohlc.index.year == year]
+    else:
+        last_day = ohlc.index[-1]
+        ohlc_backtest = ohlc[ohlc.index > last_day - pd.DateOffset(years = 1)]
+    # Criando uma série com a predição e o index do ano
+    policy = pd.Series(policy, index = ohlc_backtest.index)
+    # Colocando a predição nesse dataframe
+    ohlc_backtest["Signal"] = 0
+    ohlc_backtest.loc[policy.index, "Signal"] = policy
 
-def backtesting_model(ohlc, model, year = None, **kwargs):
-    # Calcula os indicadores
-    indicators = create_indicators(ohlc)
+    return ohlc_backtest
 
+# Função principal que toma os dados e prediz a política para um ano específico
+def backtesting_model(ohlc, year = None, n_estimators = 100, **kwargs):
+    # Calculando os indicadores
+    indicators = create_indicators(ohlc, **kwargs)
     # Calculando o rótulo
     y = np.array(labelData(ohlc["Adj Close"].to_numpy())).ravel()
     # Eliminando as linhas com NaN
@@ -41,22 +57,14 @@ def backtesting_model(ohlc, model, year = None, **kwargs):
     # Convertendo para numpy arrays, caso ainda não estejam
     X = np.array(indicators_train)[:, :-1]
     y = np.array(indicators_train)[:, -1]
-    
+
     # Treinando o modelo
-    model = model(X, y, **kwargs)
+    model = random_forest(X, y, n_estimators = n_estimators)
+
     # Predizendo a política para aquele ano
-    pred = model.predict(np.array(indicators_backtest)[:, :-1])
-    # Salvando a predição em um dataframe adequado (próximas 4 linhas)
-    # Pegando os dados originais do período de backtest
-    if year:
-        ohlc_backtest = ohlc[ohlc.index.year == year]
-    else:
-        last_day = ohlc.index[-1]
-        ohlc_backtest = ohlc[ohlc.index > last_day - pd.DateOffset(years = 1)]
-    # Criando uma série com a predição e o index do ano
-    policy = pd.Series(pred, index = ohlc_backtest.index)
-    # Colocando a predição nesse dataframe
-    ohlc_backtest["Signal"] = 0
-    ohlc_backtest.loc[policy.index, "Signal"] = policy
+    policy = model.predict(np.array(indicators_backtest)[:, :-1])
+
+    # Juntando a política com os dados originais
+    ohlc_backtest = adjust_policy_data(ohlc, year, policy)
 
     return ohlc_backtest
