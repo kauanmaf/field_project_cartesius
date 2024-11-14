@@ -60,11 +60,24 @@ def backtesting_model(ohlc, year = None, n_estimators = 100, **kwargs):
     X = np.array(indicators_train)[:, :-1]
     y = np.array(indicators_train)[:, -1]
 
-    # Treinando o modelo
-    model = random_forest(X, y, n_estimators = n_estimators)
+    # Separando os rótulos em vertentes de compra e de venda
+    y_buy = y.copy()
+    y_buy[y_buy == -1] = 0
+    y_sell = y.copy()
+    y_sell[y_sell == 1] = 0
 
-    # Predizendo a política para aquele ano
-    policy = model.predict(np.array(indicators_backtest)[:, :-1])
+    # Treinando os modelos
+    model_buy = random_forest(X, y_buy, n_estimators = n_estimators)
+    model_sell = random_forest(X, y_sell, n_estimators = n_estimators)
+
+    # Predizendo a política para o ano de backtest
+    policy_buy = model_buy.predict(np.array(indicators_backtest)[:, :-1])
+    policy_sell = model_sell.predict(np.array(indicators_backtest)[:, :-1])
+
+    policy = policy_buy + policy_sell
+
+    total_accuracy = np.sum(policy == indicators_backtest["y"])/np.size(policy)
+    print("Acurácia total: ", total_accuracy)
 
     # Juntando a política com os dados originais
     ohlc_backtest = adjust_policy_data(ohlc, year, policy)
