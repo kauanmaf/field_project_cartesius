@@ -8,7 +8,7 @@ from backtesting import Backtest, Strategy
 import json
 
 # Função para criar a função objetivo
-def create_objective(ohlc, year):
+def create_objective(ohlc, binarized, year):
     # Cria a função objetivo
     def objective(trial):
         # Sugerindo valores para os hiperparâmetros dos indicadores
@@ -53,7 +53,7 @@ def create_objective(ohlc, year):
         n_estimators = trial.suggest_int("n_estimators", 60, 140)
 
         # Calculando a política para o dado e ano especificados com os parâmetros a serem testados
-        ohlc_backtest = backtesting_model(ohlc, year, n_estimators = n_estimators,
+        ohlc_backtest = backtesting_model(ohlc, binarized, year, n_estimators = n_estimators,
                                           adx_period=adx_period,
                                           atr_period=atr_period,
                                           cci_period=cci_period,
@@ -102,27 +102,20 @@ def create_objective(ohlc, year):
     return objective
 
 # Função que otimiza os hiperparâmetros
-def run_optimization(ohlc, year, n_trials = 100):
+def run_optimization(ohlc, binarized, year, n_trials = 100):
     # Criando o estudo e realizando a otimização
     study = optuna.create_study(direction = "maximize")
-    objective = create_objective(ohlc, year)
+    objective = create_objective(ohlc, binarized, year)
     study.optimize(objective, n_trials = n_trials)
 
     # Pegando o nome do dado usado
     data_name = [name for name, value in globals().items() if value is ohlc]
     
     # Escrevendo os hiperparâmetros no JSON adequado
-    file_path = os.path.join("hyperparams", f"{data_name[0]}_{year}.json")
+    if binarized:
+        file_path = os.path.join("hyperparams", f"{data_name[0]}_b_{year}.json")
+    else:
+        file_path = os.path.join("hyperparams", f"{data_name[0]}_{year}.json")
+
     with open(file_path, "w") as f:
         json.dump(study.best_params, f)
-
-# # carregando os melhores parametros do arquivo
-# file_path = os.path.join("params", f"{stock_name}_best_params.json")
-# with open(file_path, "r") as f:
-#     best_params = json.load(f)
-
-# ## Como utilizar eles?
-# # resultado = backtesting_model(olhc, model, year = None, **best_params):
-
-# print("Melhores parâmetros:", study.best_params)
-# print("Melhor score:", study.best_value)
