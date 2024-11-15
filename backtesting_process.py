@@ -90,9 +90,11 @@ def backtesting_model(ohlc, binarized, year = None, n_estimators = 100, **kwargs
         policy = model.predict(np.array(indicators_backtest)[:, :-1])
 
     # Exibindo os resultados do modelo
-    print(classification_report(np.array(indicators_backtest)[:, -1], policy))
+    # print(classification_report(np.array(indicators_backtest)[:, -1], policy))
+    report = classification_report(np.array(indicators_backtest)[:, -1], policy, output_dict=True)
+    accuracy = report['accuracy']
 
     # Juntando a política com os dados originais
     ohlc_backtest = adjust_policy_data(ohlc, year, policy)
 
-    return ohlc_backtest
+    return ohlc_backtest, accuracy
