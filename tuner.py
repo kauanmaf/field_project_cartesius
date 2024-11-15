@@ -1,7 +1,6 @@
 import os
 from indicadores import *
 from backtesting_process import *
-import models as mod
 import optuna
 import labeling as lb
 from backtesting import Backtest, Strategy

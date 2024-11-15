@@ -1,6 +1,7 @@
 from indicadores import *
 from labeling import *
-from models import *
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report
 
 # Função para calcular os indicadores do dado
 def create_indicators(ohlc, **kwargs):
@@ -69,8 +70,10 @@ def backtesting_model(ohlc, binarized, year = None, n_estimators = 100, **kwargs
         y_sell[y_sell == 1] = 0
 
         # Treina os modelos
-        model_buy = random_forest(X, y_buy, n_estimators = n_estimators)
-        model_sell = random_forest(X, y_sell, n_estimators = n_estimators)
+        model_buy = RandomForestClassifier(n_estimators = n_estimators, random_state = 42)
+        model_buy.fit(X, y_buy)
+        model_sell = RandomForestClassifier(n_estimators = n_estimators, random_state = 42)
+        model_sell.fit(X, y_sell)
 
         # Prediz a política para o ano de backtest
         policy_buy = model_buy.predict(np.array(indicators_backtest)[:, :-1])
@@ -80,10 +83,14 @@ def backtesting_model(ohlc, binarized, year = None, n_estimators = 100, **kwargs
 
     else:
         # Treina o modelo
-        model = random_forest(X, y, n_estimators = n_estimators)
+        model = RandomForestClassifier(n_estimators = n_estimators, random_state = 42)
+        model.fit(X, y)
 
         # Prediz a política para aquele ano
         policy = model.predict(np.array(indicators_backtest)[:, :-1])
+
+    # Exibindo os resultados do modelo
+    print(classification_report(np.array(indicators_backtest)[:, -1], policy))
 
     # Juntando a política com os dados originais
     ohlc_backtest = adjust_policy_data(ohlc, year, policy)

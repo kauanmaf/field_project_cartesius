@@ -3,7 +3,7 @@ from tuner import *
 import sys
 
 # Dado
-DATA = viva_data
+DATA = prio_data
 # Ano no qual será feito o backtest
 YEAR_BACKTEST = 2024
 # Ano a ser usado como validação da tunagem de hiperparâmetros
