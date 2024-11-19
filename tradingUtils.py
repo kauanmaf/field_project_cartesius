@@ -1,6 +1,12 @@
 import pandas as pd
 from backtesting import Strategy, Backtest
 
+def read_and_set_index(file_csv):
+    data = pd.read_csv(file_csv)
+    data["Date"] = pd.to_datetime(data["Date"])
+    data.set_index("Date", inplace = True)
+    return data
+
 # Carregando os dados e ajustando o datetime
 tsla_data = pd.read_csv("data/TSLA.csv")
 tsla_data["Date"] = pd.to_datetime(tsla_data["Date"])
