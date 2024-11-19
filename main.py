@@ -9,7 +9,7 @@ YEAR_BACKTEST = 2024
 # Ano a ser usado como validação da tunagem de hiperparâmetros
 YEAR_VAL = 2023
 # Variável para ativar ou desativar a tunagem
-TUNE = True
+TUNE = False
 # Variável para ativar ou desativar a binarização dos dados
 BINARIZED = True
 
@@ -18,7 +18,7 @@ if TUNE:
     if not YEAR_VAL or not YEAR_BACKTEST or YEAR_VAL == YEAR_BACKTEST:
         print("Erro de chamada: os anos de validação e backtest devem estar determinados e devem ser diferentes.")
         sys.exit()
-    run_optimization(DATA, BINARIZED, YEAR_VAL, n_trials = 100)
+    run_optimization(DATA, BINARIZED, YEAR_VAL, n_trials = 100, name_params=["EMA"])
 
 # Pegando o caminho do arquivo com os hiperparâmetros
 data_name = [name for name, value in globals().items() if value is DATA]

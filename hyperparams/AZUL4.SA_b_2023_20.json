@@ -1,0 +1,1 @@
+{"n_estimators": 110, "adx_period": 30, "atr_period": 14, "stc_window_slow": 54, "stc_window_fast": 27, "stc_cycle": 10, "stc_smooth1": 2, "stc_smooth2": 4, "mass_window_fast": 10, "mass_window_slow": 29, "dpo_window": 18, "awesome_window1": 7, "awesome_window2": 38}

@@ -4,15 +4,28 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report
 
 # Função para calcular os indicadores do dado
-def create_indicators(ohlc, **kwargs):
+def create_indicators(ohlc, k_best = 0, **kwargs):
     # Calcula e agrega todos os indicadores
     indicators = agg_indicators(ohlc, **kwargs)
     # Normaliza eles
     indicators = normalize_indicators(indicators)
     # Retirando indicadores correlacionados
-    # indicators = decorrelate(indicators)
+    if k_best == 0:
+        return indicators
+    else:
+        indicators = decorrelate(indicators, k_best=k_best)
+        return indicators
 
-    return indicators
+# Função para pegar o nome das colunas
+def get_columns_name(ohlc, k_best):
+    # Calcula e agrega todos os indicadores
+    indicators = agg_indicators(ohlc)
+    # Normaliza eles
+    indicators = normalize_indicators(indicators)
+    # Retirando indicadores correlacionados
+    indicators = decorrelate(indicators, k_best=k_best)
+    lista_colunas = [nome.lower() for nome in indicators.columns]
+    return indicators.columns
 
 # Função para separar os dados de treino e backtest
 def train_backtest_split(indicators, year = None):
@@ -91,8 +104,10 @@ def backtesting_model(ohlc, binarized, year = None, n_estimators = 100, **kwargs
 
     # Exibindo os resultados do modelo
     print(classification_report(np.array(indicators_backtest)[:, -1], policy))
+    report = classification_report(np.array(indicators_backtest)[:, -1], policy, output_dict=True)
+    accuracy = report["accuracy"]
 
     # Juntando a política com os dados originais
     ohlc_backtest = adjust_policy_data(ohlc, year, policy)
 
-    return ohlc_backtest
+    return ohlc_backtest, accuracy

@@ -152,92 +152,139 @@ def awesome(data, window1 = 5, window2 = 34):
     return ao
 
 ## Processing
-
 def agg_indicators(
     data,
-    adx_period=14,
-    atr_period=14,
-    cci_period=20,
-    bb_period=20,
-    bb_num_std=2,
-    macd_fast=12,
-    macd_slow=26,
-    macd_signal=9,
-    aroon_period=25,
-    stc_window_slow=50,
-    stc_window_fast=23,
-    stc_cycle=10,
-    stc_smooth1=3,
-    stc_smooth2=3,
-    kst_r1=10, kst_r2=15, kst_r3=20, kst_r4=30,
-    kst_n1=10, kst_n2=10, kst_n3=10, kst_n4=15,
-    kst_signal=9,
-    vortex_window=14,
-    trix_window=15,
-    mass_window_fast=9,
-    mass_window_slow=25,
-    dpo_window=20,
-    stoch_rsi_period=14,
-    stoch_period=14,
-    stoch_smooth1=3,
-    stoch_smooth2=3,
-    sto_period=14,
-    sto_smooth_k=3,
-    sto_smooth_d=3,
-    rsi_window=14,
-    awesome_window1=5,
-    awesome_window2=34
+    **kwargs
 ):
-    adx = ADX(data, adx_period=adx_period)
-    obv = on_balance_volume(data)
-    atr = average_true_range(data, atr_period=atr_period)
-    cci = commodity_channel_index(data, cci_period=cci_period)
-    ema, upper_band, lower_band = bollinger_bands(data, bb_period=bb_period, num_std=bb_num_std)
-    macd_line, signal_line, macd_histogram = MACD(data, macd_fast=macd_fast, macd_slow=macd_slow, macd_signal=macd_signal)
-    aroon_up, aroon_down, aroon_oscillator = aroon_indicator(data, aroon_period=aroon_period)
-    stc = schaff_trend_cycle(data, window_slow=stc_window_slow, window_fast=stc_window_fast, cycle=stc_cycle, smooth1=stc_smooth1, smooth2=stc_smooth2)
-    kst, kst_signal_line, kst_diff = kst_oscillator(data, r1=kst_r1, r2=kst_r2, r3=kst_r3, r4=kst_r4, n1=kst_n1, n2=kst_n2, n3=kst_n3, n4=kst_n4, signal=kst_signal)
-    vi_pos, vi_neg = vortex(data, window=vortex_window)
-    ti = trix(data, window=trix_window)
-    mi = mass(data, window_fast=mass_window_fast, window_slow=mass_window_slow)
-    dpo = detrended_price(data, window=dpo_window)
-    stoch_rsi_k, stoch_rsi_d = stochastic_rsi(data, rsi_period=stoch_rsi_period, stoch_period=stoch_period, smooth1=stoch_smooth1, smooth2=stoch_smooth2)
-    sto_osc, sto_sig = stochastic_oscillator(data, stoch_period=sto_period, smooth_k=sto_smooth_k, smooth_d=sto_smooth_d)
-    rsi = relative_strength(data, window=rsi_window)
-    ao = awesome(data, window1=awesome_window1, window2=awesome_window2)
+    # Default parameter values
+    defaults = {
+        "adx_period": 14,
+        "atr_period": 14,
+        "cci_period": 20,
+        "bb_period": 20,
+        "bb_num_std": 2,
+        "macd_fast": 12,
+        "macd_slow": 26,
+        "macd_signal": 9,
+        "aroon_period": 25,
+        "stc_window_slow": 50,
+        "stc_window_fast": 23,
+        "stc_cycle": 10,
+        "stc_smooth1": 3,
+        "stc_smooth2": 3,
+        "kst_r1": 10, "kst_r2": 15, "kst_r3": 20, "kst_r4": 30,
+        "kst_n1": 10, "kst_n2": 10, "kst_n3": 10, "kst_n4": 15,
+        "kst_signal": 9,
+        "vortex_window": 14,
+        "trix_window": 15,
+        "mass_window_fast": 9,
+        "mass_window_slow": 25,
+        "dpo_window": 20,
+        "stoch_rsi_period": 14,
+        "stoch_period": 14,
+        "stoch_smooth1": 3,
+        "stoch_smooth2": 3,
+        "sto_period": 14,
+        "sto_smooth_k": 3,
+        "sto_smooth_d": 3,
+        "rsi_window": 14,
+        "awesome_window1": 5,
+        "awesome_window2": 34,
+    }
 
-    indicators_df = pd.DataFrame({
-        "ADX": adx,
-        "OBV": obv,
-        "ATR": atr,
-        "CCI": cci,
-        "EMA": ema,
-        "Upper Band": upper_band,
-        "Lower Band": lower_band,
-        "MACD Line": macd_line,
-        "Signal Line": signal_line,
-        "MACD Histogram": macd_histogram,
-        "Aroon Up": aroon_up,
-        "Aroon Down": aroon_down,
-        "Aroon Oscillator": aroon_oscillator,
-        "STC": stc,
-        "KST": kst,
-        "KST Signal": kst_signal_line,
-        "KST Diff": kst_diff,
-        "Positive Vortex": vi_pos,
-        "Negative Vortex": vi_neg,
-        "Trix": ti,
-        "Mass": mi,
-        "DPO": dpo,
-        "SRSI-k": stoch_rsi_k, 
-        "SRSI-d": stoch_rsi_d,
-        "Stochastic Oscillator": sto_osc, 
-        "Stochastic Oscillator Signal": sto_sig,
-        "RSI": rsi,
-        "Awesome": ao
-    })
-    
+    # Update defaults with any parameters provided via kwargs
+    params = {**defaults, **kwargs}
+
+    # Initialize an empty DataFrame to store the results
+    indicators_df = pd.DataFrame()
+
+    # Calculate indicators only for provided parameters
+    if "adx_period" in params:
+        indicators_df["adx"] = ADX(data, adx_period=params["adx_period"])
+    if "atr_period" in params:
+        indicators_df["atr"] = average_true_range(data, atr_period=params["atr_period"])
+    if "cci_period" in params:
+        indicators_df["cci"] = commodity_channel_index(data, cci_period=params["cci_period"])
+    if "bb_period" in params and "bb_num_std" in params:
+        ema, upper_band, lower_band = bollinger_bands(
+            data, bb_period=params["bb_period"], num_std=params["bb_num_std"]
+        )
+        indicators_df["ema"] = ema
+        indicators_df["upper band"] = upper_band
+        indicators_df["lower band"] = lower_band
+    if {"macd_fast", "macd_slow", "macd_signal"}.issubset(params):
+        macd_line, signal_line, macd_histogram = MACD(
+            data, macd_fast=params["macd_fast"], macd_slow=params["macd_slow"], macd_signal=params["macd_signal"]
+        )
+        indicators_df["macd line"] = macd_line
+        indicators_df["signal line"] = signal_line
+        indicators_df["macd histogram"] = macd_histogram
+    if "aroon_period" in params:
+        aroon_up, aroon_down, aroon_oscillator = aroon_indicator(
+            data, aroon_period=params["aroon_period"]
+        )
+        indicators_df["aroon up"] = aroon_up
+        indicators_df["aroon down"] = aroon_down
+        indicators_df["aroon oscillator"] = aroon_oscillator
+    if {"stc_window_slow", "stc_window_fast", "stc_cycle", "stc_smooth1", "stc_smooth2"}.issubset(params):
+        indicators_df["stc"] = schaff_trend_cycle(
+            data,
+            window_slow=params["stc_window_slow"],
+            window_fast=params["stc_window_fast"],
+            cycle=params["stc_cycle"],
+            smooth1=params["stc_smooth1"],
+            smooth2=params["stc_smooth2"],
+        )
+    if {"kst_r1", "kst_r2", "kst_r3", "kst_r4", "kst_n1", "kst_n2", "kst_n3", "kst_n4", "kst_signal"}.issubset(params):
+        kst, kst_signal_line, kst_diff = kst_oscillator(
+            data,
+            r1=params["kst_r1"], r2=params["kst_r2"], r3=params["kst_r3"], r4=params["kst_r4"],
+            n1=params["kst_n1"], n2=params["kst_n2"], n3=params["kst_n3"], n4=params["kst_n4"],
+            signal=params["kst_signal"],
+        )
+        indicators_df["kst"] = kst
+        indicators_df["kst signal"] = kst_signal_line
+        indicators_df["kst diff"] = kst_diff
+    if "vortex_window" in params:
+        vi_pos, vi_neg = vortex(data, window=params["vortex_window"])
+        indicators_df["positive vortex"] = vi_pos
+        indicators_df["negative vortex"] = vi_neg
+    if "trix_window" in params:
+        indicators_df["trix"] = trix(data, window=params["trix_window"])
+    if {"mass_window_fast", "mass_window_slow"}.issubset(params):
+        indicators_df["mass"] = mass(
+            data, window_fast=params["mass_window_fast"], window_slow=params["mass_window_slow"]
+        )
+    if "dpo_window" in params:
+        indicators_df["dpo"] = detrended_price(data, window=params["dpo_window"])
+    if {"stoch_rsi_period", "stoch_period", "stoch_smooth1", "stoch_smooth2"}.issubset(params):
+        stoch_rsi_k, stoch_rsi_d = stochastic_rsi(
+            data,
+            rsi_period=params["stoch_rsi_period"],
+            stoch_period=params["stoch_period"],
+            smooth1=params["stoch_smooth1"],
+            smooth2=params["stoch_smooth2"],
+        )
+        indicators_df["srsi-k"] = stoch_rsi_k
+        indicators_df["srsi-d"] = stoch_rsi_d
+    if {"sto_period", "sto_smooth_k", "sto_smooth_d"}.issubset(params):
+        sto_osc, sto_sig = stochastic_oscillator(
+            data,
+            stoch_period=params["sto_period"],
+            smooth_k=params["sto_smooth_k"],
+            smooth_d=params["sto_smooth_d"],
+        )
+        indicators_df["stochastic oscillator"] = sto_osc
+        indicators_df["stochastic oscillator signal"] = sto_sig
+    if "rsi_window" in params:
+        indicators_df["rsi"] = relative_strength(data, window=params["rsi_window"])
+    if {"awesome_window1", "awesome_window2"}.issubset(params):
+        indicators_df["awesome"] = awesome(
+            data, window1=params["awesome_window1"], window2=params["awesome_window2"]
+        )
+
     return indicators_df
+
 
 def plot_distributions(data, bins=30, kde=True, figsize=(15, 20)):
     """
@@ -304,7 +351,7 @@ def decorrelate(data_normalized, limite_correlacao = 0.8, show_graphs = False, k
                 remove["biggest_sum"] = correlation_sum
                 remove["column"] = column
         # If no columns exceed the threshold, break the loop
-        if remove["column"] is None or matriz_corr.shape[0] < k_best:
+        if remove["column"] is None or matriz_corr.shape[0] <= k_best:
             break
         # Add the column to the drop list and remove it from the correlation matrix
         columns_to_drop.append(remove["column"])

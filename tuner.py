@@ -7,92 +7,76 @@ from backtesting import Backtest, Strategy
 import json
 
 # Função para criar a função objetivo
-def create_objective(ohlc, binarized, year):
-    # Cria a função objetivo
+def create_objective(ohlc, binarized, year, lista_colunas):
+    # Cria a função objetivo    
     def objective(trial):
-        # Sugerindo valores para os hiperparâmetros dos indicadores
-        adx_period = trial.suggest_int("adx_period", 10, 30)
-        atr_period = trial.suggest_int("atr_period", 10, 30)
-        cci_period = trial.suggest_int("cci_period", 10, 30)
-        bb_period = trial.suggest_int("bb_period", 15, 30)
-        bb_num_std = trial.suggest_float("bb_num_std", 1.5, 3.0)
-        macd_fast = trial.suggest_int("macd_fast", 8, 15)
-        macd_slow = trial.suggest_int("macd_slow", 20, 30)
-        macd_signal = trial.suggest_int("macd_signal", 5, 10)
-        aroon_period = trial.suggest_int("aroon_period", 10, 30)
-        stc_window_slow = trial.suggest_int("stc_window_slow", 40, 60)
-        stc_window_fast = trial.suggest_int("stc_window_fast", 15, 30)
-        stc_cycle = trial.suggest_int("stc_cycle", 8, 15)
-        stc_smooth1 = trial.suggest_int("stc_smooth1", 2, 5)
-        stc_smooth2 = trial.suggest_int("stc_smooth2", 2, 5)
-        kst_r1 = trial.suggest_int("kst_r1", 5, 15)
-        kst_r2 = trial.suggest_int("kst_r2", 10, 20)
-        kst_r3 = trial.suggest_int("kst_r3", 15, 25)
-        kst_r4 = trial.suggest_int("kst_r4", 25, 35)
-        kst_n1 = trial.suggest_int("kst_n1", 5, 15)
-        kst_n2 = trial.suggest_int("kst_n2", 5, 15)
-        kst_n3 = trial.suggest_int("kst_n3", 5, 15)
-        kst_n4 = trial.suggest_int("kst_n4", 10, 20)
-        kst_signal = trial.suggest_int("kst_signal", 5, 10)
-        vortex_window = trial.suggest_int("vortex_window", 10, 30)
-        trix_window = trial.suggest_int("trix_window", 10, 30)
-        mass_window_fast = trial.suggest_int("mass_window_fast", 5, 15)
-        mass_window_slow = trial.suggest_int("mass_window_slow", 20, 30)
-        dpo_window = trial.suggest_int("dpo_window", 15, 25)
-        stoch_rsi_period = trial.suggest_int("stoch_rsi_period", 10, 20)
-        stoch_period = trial.suggest_int("stoch_period", 10, 20)
-        stoch_smooth1 = trial.suggest_int("stoch_smooth1", 2, 5)
-        stoch_smooth2 = trial.suggest_int("stoch_smooth2", 2, 5)
-        sto_period = trial.suggest_int("sto_period", 10, 20)
-        sto_smooth_k = trial.suggest_int("sto_smooth_k", 2, 5)
-        sto_smooth_d = trial.suggest_int("sto_smooth_d", 2, 5)
-        rsi_window = trial.suggest_int("rsi_window", 10, 30)
-        awesome_window1 = trial.suggest_int("awesome_window1", 2, 10)
-        awesome_window2 = trial.suggest_int("awesome_window2", 20, 40)
-        n_estimators = trial.suggest_int("n_estimators", 60, 140)
+        # Dictionary mapping indicators to their associated hyperparameters
+        hyperparams_mapping = {
+            "adx": {"adx_period": (10, 30)},
+            "atr": {"atr_period": (10, 30)},
+            "cci": {"cci_period": (10, 30)},
+            "bollinger": {"bb_period": (15, 30), "bb_num_std": (1.5, 3.0)},
+            "macd": {"macd_fast": (8, 15), "macd_slow": (20, 30), "macd_signal": (5, 10)},
+            "aroon": {"aroon_period": (10, 30)},
+            "stc": {
+                "stc_window_slow": (40, 60),
+                "stc_window_fast": (15, 30),
+                "stc_cycle": (8, 15),
+                "stc_smooth1": (2, 5),
+                "stc_smooth2": (2, 5),
+            },
+            "kst": {
+                "kst_r1": (5, 15),
+                "kst_r2": (10, 20),
+                "kst_r3": (15, 25),
+                "kst_r4": (25, 35),
+                "kst_n1": (5, 15),
+                "kst_n2": (5, 15),
+                "kst_n3": (5, 15),
+                "kst_n4": (10, 20),
+                "kst_signal": (5, 10),
+            },
+            "vortex": {"vortex_window": (10, 30)},
+            "trix": {"trix_window": (10, 30)},
+            "mass": {"mass_window_fast": (5, 15), "mass_window_slow": (20, 30)},
+            "dpo": {"dpo_window": (15, 25)},
+            "stoch_rsi": {"stoch_rsi_period": (10, 20)},
+            "stoch": {
+                "stoch_period": (10, 20),
+                "stoch_smooth1": (2, 5),
+                "stoch_smooth2": (2, 5),
+            },
+            "sto": {
+                "sto_period": (10, 20),
+                "sto_smooth_k": (2, 5),
+                "sto_smooth_d": (2, 5),
+            },
+            "rsi": {"rsi_window": (10, 30)},
+            "awesome": {"awesome_window1": (2, 10), "awesome_window2": (20, 40)},
+        }
 
-        # Calculando a política para o dado e ano especificados com os parâmetros a serem testados
-        ohlc_backtest = backtesting_model(ohlc, binarized, year, n_estimators = n_estimators,
-                                          adx_period=adx_period,
-                                          atr_period=atr_period,
-                                          cci_period=cci_period,
-                                          bb_period=bb_period,
-                                          bb_num_std=bb_num_std,
-                                          macd_fast=macd_fast,
-                                          macd_slow=macd_slow,
-                                          macd_signal=macd_signal,
-                                          aroon_period=aroon_period,
-                                          stc_window_slow=stc_window_slow,
-                                          stc_window_fast=stc_window_fast,
-                                          stc_cycle=stc_cycle,
-                                          stc_smooth1=stc_smooth1,
-                                          stc_smooth2=stc_smooth2,
-                                          kst_r1=kst_r1,
-                                          kst_r2=kst_r2,
-                                          kst_r3=kst_r3,
-                                          kst_r4=kst_r4,
-                                          kst_n1=kst_n1,
-                                          kst_n2=kst_n2,
-                                          kst_n3=kst_n3,
-                                          kst_n4=kst_n4,
-                                          kst_signal=kst_signal,
-                                          vortex_window=vortex_window,
-                                          trix_window=trix_window,
-                                          mass_window_fast=mass_window_fast,
-                                          mass_window_slow=mass_window_slow,
-                                          dpo_window=dpo_window,
-                                          stoch_rsi_period=stoch_rsi_period,
-                                          stoch_period=stoch_period,
-                                          stoch_smooth1=stoch_smooth1,
-                                          stoch_smooth2=stoch_smooth2,
-                                          sto_period=sto_period,
-                                          sto_smooth_k=sto_smooth_k,
-                                          sto_smooth_d=sto_smooth_d,
-                                          rsi_window=rsi_window,
-                                          awesome_window1=awesome_window1,
-                                          awesome_window2=awesome_window2)
+        # Default parameters to always include
+        params = {}
+        params["n_estimators"] = trial.suggest_int("n_estimators", 60, 140)
 
-        bt = Backtest(ohlc_backtest, OurStrategy, cash=10000)
+        # Loop through hyperparameters and filter by lista_colunas
+        for indicador, hyperparams in hyperparams_mapping.items():
+            if indicador in lista_colunas:
+                for param, bounds in hyperparams.items():
+                    if isinstance(bounds[0], int):
+                        params[param] = trial.suggest_int(param, bounds[0], bounds[1])
+                    elif isinstance(bounds[0], float):  # Float range
+                        params[param] = trial.suggest_float(param, bounds[0], bounds[1])
+  
+        # Calculating the policy dynamically
+        ohlc_backtest = backtesting_model(
+            ohlc,
+            binarized,
+            year,
+            **params,
+        )
+
+        bt = Backtest(ohlc_backtest[0], OurStrategy, cash=10000)
         stats = bt.run()
         score = stats["Equity Final [$]"]
 
@@ -101,20 +85,17 @@ def create_objective(ohlc, binarized, year):
     return objective
 
 # Função que otimiza os hiperparâmetros
-def run_optimization(ohlc, binarized, year, n_trials = 100):
+def run_optimization(ohlc, binarized, year, ticker, lista_colunas: list, n_trials = 100):
     # Criando o estudo e realizando a otimização
     study = optuna.create_study(direction = "maximize")
-    objective = create_objective(ohlc, binarized, year)
+    objective = create_objective(ohlc, binarized, year, lista_colunas)
     study.optimize(objective, n_trials = n_trials)
-
-    # Pegando o nome do dado usado
-    data_name = [name for name, value in globals().items() if value is ohlc]
     
     # Escrevendo os hiperparâmetros no JSON adequado
     if binarized:
-        file_path = os.path.join("hyperparams", f"{data_name[0]}_b_{year}.json")
+        file_path = os.path.join("hyperparams", f"{ticker}_b_{year}_{len(lista_colunas)}.json")
     else:
-        file_path = os.path.join("hyperparams", f"{data_name[0]}_{year}.json")
+        file_path = os.path.join("hyperparams",f"{ticker}_{year}_{len(lista_colunas)}.json")
 
     with open(file_path, "w") as f:
         json.dump(study.best_params, f)
