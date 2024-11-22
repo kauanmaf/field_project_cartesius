@@ -7,7 +7,7 @@ import sys
 import glob
 
 # Função principal para processar dados, realizar tunagem de hiperparâmetros, executar backtesting e salvar resultados
-def main_process(files: list, len_indic: np.array, year_backtest: int, year_val: int, tune: bool, binarized: bool, test_columns: bool, volatility_df: pd.DataFrame):
+def main_process(files: list, len_indic: np.array, year_backtest: int, year_val: int, tune: bool, binarized: bool, test_columns: bool, volatility_df: pd.DataFrame, n_trials = 100):
     """
     Processa uma lista de arquivos contendo dados financeiros, executa tunagem de hiperparâmetros (se ativada), 
     realiza backtesting e gera resultados consolidados.
@@ -66,7 +66,7 @@ def main_process(files: list, len_indic: np.array, year_backtest: int, year_val:
 
             # Se a tunagem estiver ativada, otimiza os hiperparâmetros
             if tune:
-                study_params, study_value = run_optimization(DATA, binarized, year_val, TICKER, n_trials=5, k_best=n_colunas)
+                study_params, study_value = run_optimization(DATA, binarized, year_val, TICKER, n_trials=n_trials, k_best=n_colunas)
                 # Salva os parâmetros otimizados e o valor de desempenho no dicionário
                 json_ticker[f"{n_colunas}"] = {"params": study_params, "value": study_value}
                 best_params = study_params
