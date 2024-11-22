@@ -65,52 +65,62 @@ def fixed_time_horizon_labeling(returns, h, tau):
 
     Returns:
     -------
-    labels : numpy array
-        Um array de labels com os valores:
-            - 1 se o retorno nos próximos `h` dias é maior que`tau`.
-            - 0 se o valor absoluto do retorno nos próximos `h` dias é menor ou igual a `tau`.
-            - -1 se o retorno nos próximos `h` dias é menor que`tau`.
+    numpy.ndarray
+        Array de labels com os valores:
+        - 1 se o retorno nos próximos `h` dias é maior que`tau`.
+        - 0 se o valor absoluto do retorno nos próximos `h` dias é menor ou igual a `tau`.
+        - -1 se o retorno nos próximos `h` dias é menor que`tau`.
         O comprimento de `labels` será `len(returns) - h` para considerar o intervalo dos primeiros `h` dias.
+
+    Raises
+    ------
+    ValueError
+        Se `h` for não-positivo ou o comprimento de `returns` é insuficiente.
     """    
+    if h <= 0:
+        raise ValueError("Horizonte de tempo `h` precisa ser positivo")
+    if len(returns) < h:
+        raise ValueError("Dados de retorno insuficientes para o horizonte de tempo dado")
+    
     labels = np.zeros(len(returns) + 1)
     
-    # Limiares
-    # Se tivermos um array de limiares, usamos o limiar definido com ewm.
-    try:
-        if isinstance(tau, type(np.array([1]))) or isinstance(tau, type(pd.Series([1]))):
-            for i in range(h, len(returns)):
-                # Calcula o retorno cumulativo dos próximos h dias.
-                cumulative_return = np.sum(returns[i:i + h])
-                
-                # Define o rótulo de acordo com o limiar.
-                if cumulative_return > tau[i]:
-                    labels[i] = 1
-                elif abs(cumulative_return) <= tau[i]:
-                    labels[i] = 0
-                else:
-                    labels[i] = -1
-        # Senão, usamos o limiar fixo durante toda a rotulagem.
-        else:
-            for i in range(h, len(returns)):
-                # Calcula o retorno cumulativo dos próximos h dias.
-                cumulative_return = np.sum(returns[i:i + h])
-                
-                # Define o rótulo de acordo com o limiar.
-                if cumulative_return > tau:
-                    labels[i] = 1
-                elif abs(cumulative_return) <= tau:
-                    labels[i] = 0
-                else:
-                    labels[i] = -1
-    except Exception as e:
-        print("Tau precisa ser um inteiro, um array ou uma Series")
-        print(f"Mensagem de erro: {e}")
+    for i in range(h, len(returns)):
+        threshold = tau if np.isscalar(tau) else tau[i]
+    
+        # Calcula o retorno cumulativo dos próximos h dias.
+        cumulative_return = np.sum(returns[i:i + h])
         
+        # Define o rótulo de acordo com o limiar.
+        if cumulative_return > threshold:
+            labels[i] = 1
+        elif abs(cumulative_return) <= threshold:
+            labels[i] = 0
+        else:
+            labels[i] = -1
+
     return labels
 
 # Rotulagem usando o método do horizonte fixado com horizonte `h` e span `span` para
 # cálculo dos limiares dinâmicos.
 def labelDataFixedHorizon(data, h=3, span=5):
+    """
+    Rotula os dados utilizando o Método de Horizonte e tempo fixado com limiares (thresholds) definidos dinamicamente, de acordo com a volatilidade do período.
+
+    Parameters
+    ----------
+    data : numpy.ndarray
+        Série de preços.
+    h : int, optional
+        Horizonte de tempo (número de dias). Padrão é 3.
+    span : int, optional
+        Período para cálculo do EWMSD. Padrão é 5.
+
+    Returns
+    -------
+    numpy.ndarray
+        Array of labels.|
+    """
+
 
     # Calculando retorno logaritmico da série de preços.
     returns = log_returns(data)
@@ -119,6 +129,7 @@ def labelDataFixedHorizon(data, h=3, span=5):
     returns_series = pd.Series(returns)
     dynamic_tau = returns_series.ewm(span = span).std()
 
+    # Calculando labels com o método.
     labels_dynamic = fixed_time_horizon_labeling(returns, h, dynamic_tau)
 
     return labels_dynamic
@@ -131,34 +142,39 @@ def triple_barrier_labeling(prices, h, span, pt_factor=1, sl_factor=1):
     
     Parameters
     ----------
-    prices : numpy array
+    prices : numpy.ndarray
         Série de preços.
     h : int
         Horizonte de tempo (em número de barras) até a barreira vertical.
     span : int
-        Span para o cálculo do EWMSD para limiares dinâmicos.
-    pt_factor : float
+        Período para o cálculo do EWMSD.
+    pt_factor : float, optional
         Fator multiplicador para definir a barreira superior (profit-taking).
-    sl_factor : float
+    sl_factor : float, optional
         Fator multiplicador para definir a barreira inferior (stop-loss).
     
     Returns
     -------
-    labels : numpy array
-        Array de rótulos com 1 (profit-taking), -1 (stop-loss) ou 0 (barreira de tempo).
+    labels : numpy.ndarray
+        Array de rótulos:
+        - 1 para profit-taking
+        - -1 para stop-loss
+        - 0 para barreira de tempo.
     """
     
-    # Calcula os retornos logarítmicos.
+    # Calculando os retornos logarítmicos.
     returns = log_returns(prices)
+    # Transformando numa série pandas para viabilizar cálculo do EWMSD.
     returns_series = pd.Series(returns)
 
-    # Calcula desvio padrão móvel ponderado exponencialmente (EWMSD).
+    # Calculando desvio padrão móvel ponderado exponencialmente (EWMSD).
     ewmstd = returns_series.ewm(span=span).std()
 
+    # Criando vetor de labels
     labels = np.zeros(len(returns) + 1)
     
     for i in range(h, len(returns)):
-        # Define os limites das barreiras superior e inferior para o período utilizando o limiar dinâmico.
+        # Definindo os limites das barreiras superior e inferior para o período utilizando o limiar dinâmico.
         upper_barrier = pt_factor * ewmstd[i]
         lower_barrier = -sl_factor * ewmstd[i]
         
@@ -166,7 +182,8 @@ def triple_barrier_labeling(prices, h, span, pt_factor=1, sl_factor=1):
         cumulative_return = np.cumsum(returns[i:i + h])
         
         # Verifica qual barreira é tocada primeiro
-        for j, cum_ret in enumerate(cumulative_return):
+        for cum_ret in cumulative_return:
+            
             if cum_ret >= upper_barrier:  # Barreira superior (profit-taking)
                 labels[i] = 1
                 break
@@ -182,30 +199,54 @@ def triple_barrier_labeling(prices, h, span, pt_factor=1, sl_factor=1):
 # Rotulagem usando o método de barreira tripla.
 def labelDataTripleBarrier(data, h=5, span=5, pt_factor=1, sl_factor=1):
     """
-    Função principal para rotular a série de preços usando o método de barreira tripla.
+    Rotulagem de série de preços usando o Método de barreira tripla.
     
     Parameters
     ----------
-    data : numpy array
+    data : numpy.ndarray
         Série de preços.
-    h : int
-        Horizonte de tempo (em número de barras) até a barreira vertical.
-    span : int
-        Span para cálculo do EWMSD.
-    pt_factor : float
-        Fator multiplicador para a barreira de lucro (superior).
-    sl_factor : float
-        Fator multiplicador para a barreira de perda (inferior).
+    h : int, optional
+        Horizonte de tempo (em número de barras) até a barreira vertical. Padrão é 5
+    span : int, optional
+        Span para cálculo do EWMSD. Padrão é 5
+    pt_factor : float, optional
+        Fator multiplicador para a barreira de lucro (superior). Padrão é 1
+    sl_factor : float, optional
+        Fator multiplicador para a barreira de perda (inferior). Padrão é 1
     
     Returns
     -------
-    numpy array
+    numpy.ndarray
         Rótulos da série de preços.
     """
     return triple_barrier_labeling(data, h, span, pt_factor, sl_factor)
 
 # Função que implementa ambas as funções de rotulagem, para facilitar.
 def labelData(data: np.array, h: int=3 , span: int=5, triple_barrier: bool=True, pt_factor: float=1, sl_factor: float=1):
+    """
+    Função principal para rotulagem de dados financeiros utilizando método especificado
+
+    Parameters
+    ----------
+    data : numpy.ndarray
+        Série de preços.
+    h : int, optional
+        Horizonte de tempo (número de dias). Padrão é 3.
+    span : int, optional
+        Período para cálculo do EWMSD. Padrão é 5.
+    triple_barrier : bool, optional
+        Se True, use o Método de Barreira Tripla; caso contrário, use o Método de Horizonte de Tempo fixado. Padrão é True.
+    pt_factor : float, optional
+        Fator multiplicador para a barreira de lucro (superior). Padrão é 1
+    sl_factor : float, optional
+        Fator multiplicador para a barreira de perda (inferior). Padrão é 1
+
+    Returns
+    -------
+    numpy.ndarray
+        Array of labels.
+    """
+    
     if triple_barrier:
         return labelDataTripleBarrier(data, h, span, pt_factor, sl_factor)
     else:
