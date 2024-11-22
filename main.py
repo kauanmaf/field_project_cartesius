@@ -1,6 +1,6 @@
 from backtesting_process import *
 from tuner import *
-from num_process import *
+from main_process import *
 import glob
 import sys
 
@@ -21,7 +21,7 @@ YEAR_VAL = 2023
 # Variável para ativar ou desativar a tunagem
 TUNE = True
 # Variável para ativar ou desativar a binarização dos dados
-BINARIZED = True
+BINARIZED = False
 # Variável para testar várias quantidades de colunas
 TEST_COLUMS = True
 
