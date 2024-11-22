@@ -26,7 +26,7 @@ def main_process(files: list, len_indic: np.array, year_backtest: int, year_val:
             best_params = None
             # Se a opção de tunagem for ativada, otimiza os hiperparâmetros
             if tune:
-                study_params, study_value = run_optimization(DATA, binarized, year_val, TICKER, n_trials=5, k_best=n_colunas)
+                study_params, study_value = run_optimization(DATA, binarized, year_val, TICKER, n_trials=100, k_best=n_colunas)
                 json_ticker[n_colunas] = {"params": study_params, "value": study_value}
                 best_params = study_params
             else:
