@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from tradingUtils import *
+from trading_utils import *
 
 data = tsla_data
 

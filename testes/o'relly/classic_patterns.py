@@ -1,5 +1,5 @@
 import pandas as pd
-from tradingUtils import *
+from trading_utils import *
 
 data = tsla_data
 

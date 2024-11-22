@@ -1,4 +1,4 @@
-from indicadores import *
+from indicators import *
 from labeling import *
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report

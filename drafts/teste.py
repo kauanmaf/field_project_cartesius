@@ -5,8 +5,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 import pandas as pd
 import numpy as np
-from tradingUtils import *
-from indicadores import *
+from trading_utils import *
+from indicators import *
 import labeling as lb
 from backtesting import Backtest
 from backtesting.lib import crossover

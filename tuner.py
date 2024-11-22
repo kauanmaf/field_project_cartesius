@@ -1,5 +1,5 @@
 import os
-from indicadores import *
+from indicators import *
 from backtesting_process import *
 import optuna
 import labeling as lb

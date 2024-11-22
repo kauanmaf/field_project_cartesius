@@ -1,5 +1,5 @@
 import numpy as np
-from tradingUtils import *
+from trading_utils import *
 
 import numpy as np
 import pandas as pd
@@ -221,6 +221,7 @@ def getDailyVol(close,span0=5):
     
     return df0
 
+tsla_data = read_and_set_index("data/TSLA.csv")
 prices = tsla_data["Adj Close"].to_numpy()
 label_tsla_data = labelData(prices)
 

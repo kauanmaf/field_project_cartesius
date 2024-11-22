@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from tradingUtils import *
+from trading_utils import *
 import ta
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
@@ -379,10 +379,3 @@ def decorrelate(data_normalized, limite_correlacao = 0.8, show_graphs = False, k
         plt.show()
     
     return data_descor
-    
-
-data = tsla_data.copy()
-
-data = agg_indicators(data)
-normalized_data = normalize_indicators(data)
-new_indicators = decorrelate(data)

@@ -5,14 +5,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 import pandas as pd
 import numpy as np
-from tradingUtils import *
-from indicadores import *
+from trading_utils import *
+from indicators import *
 import labeling as lb
 from backtesting import Backtest
 from backtesting.lib import crossover
-
-DATA = prio_data
-YEAR = 2023
 
 # Função a ser executada: faz o backtesting para um dado modelo e ano
 # Se "year" for passado, ele faz o backtest nesse ano
@@ -162,14 +159,3 @@ def gradient_boosting(data, y, random_state=42):
     print(report)
 
     return gb_model
-
-# Testando o modelo
-dados_rf = backtesting_model(DATA, random_forest, year = YEAR)
-
-dados_rf.to_csv("dados.csv")
-bt = Backtest(dados_rf, OurStrategy, cash=10000)
-stats = bt.run()
-
-# # Exibindo o resultado
-bt.plot()
-print(stats)
