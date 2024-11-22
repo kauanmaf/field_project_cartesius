@@ -26,8 +26,8 @@ def main_process(files: list, len_indic: np.array, year_backtest: int, year_val:
             best_params = None
             # Se a opção de tunagem for ativada, otimiza os hiperparâmetros
             if tune:
-                study_params = run_optimization(DATA, binarized, year_val, TICKER, n_trials=5, k_best=n_colunas)
-                json_ticker[n_colunas] = study_params
+                study_params, study_value = run_optimization(DATA, binarized, year_val, TICKER, n_trials=5, k_best=n_colunas)
+                json_ticker[n_colunas] = {"params": study_params, "value": study_value}
                 best_params = study_params
             else:
                 # Caminho do arquivo com os hiperparâmetros
@@ -40,8 +40,8 @@ def main_process(files: list, len_indic: np.array, year_backtest: int, year_val:
                 if os.path.exists(hyperparams_path):
                     with open(hyperparams_path, "r") as f:
                         dict_best_params = json.load(f)
-                    if f"{n_colunas}" in dict_best_params.keys():
-                        best_params = dict_best_params[f"{n_colunas}"]
+                    if n_colunas in dict_best_params.keys():
+                        best_params = dict_best_params[n_colunas]["params"]
 
             if best_params is not None:
                 policy, accuracy, dict_total, _ = backtesting_model(DATA, year_backtest, **best_params)
@@ -79,6 +79,9 @@ def main_process(files: list, len_indic: np.array, year_backtest: int, year_val:
             # Adiciona os resultados ao DataFrame final
             final_results.append(teste)
             print(f"{TICKER} processado com {n_colunas} indicadores")
+
+        # Ordenando os elementos do dicionário com base no valor obtido por aquela combinação
+        json_ticker = dict(sorted(json_ticker.items(), key=lambda x: x[1]["value"], reverse=True))
 
         if not test_columns:
             break  # Sai do loop de LEN_INDIC caso TEST_COLUMNS esteja desativado
