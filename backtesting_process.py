@@ -2,6 +2,8 @@ from indicadores import *
 from labeling import *
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report
+from sklearn.feature_selection import SelectFromModel
+
 
 # Função para calcular os indicadores do dado
 def create_indicators(ohlc, **kwargs):
@@ -9,10 +11,18 @@ def create_indicators(ohlc, **kwargs):
     indicators = agg_indicators(ohlc, **kwargs)
     # Normaliza eles
     indicators = normalize_indicators(indicators)
-    # Retirando indicadores correlacionados
-    # indicators = decorrelate(indicators)
-
     return indicators
+
+# # Função para pegar o nome das colunas
+# def get_columns_name(ohlc, k_best):
+#     # Calcula e agrega todos os indicadores
+#     indicators = agg_indicators(ohlc)
+#     # Normaliza eles
+#     indicators = normalize_indicators(indicators)
+#     # Retirando indicadores correlacionados
+#     indicators = decorrelate(indicators, k_best=k_best)
+#     lista_colunas = [nome.lower() for nome in indicators.columns]
+#     return indicators.columns
 
 # Função para separar os dados de treino e backtest
 def train_backtest_split(indicators, year = None):
@@ -45,21 +55,31 @@ def adjust_policy_data(ohlc, year, policy):
     return ohlc_backtest
 
 # Função principal que toma os dados e prediz a política para um ano específico
-def backtesting_model(ohlc, binarized, year = None, n_estimators = 100, **kwargs):
+def backtesting_model(ohlc, binarized, year=None, n_estimators=100, n_features=None, show_report = False, **kwargs):
     # Calculando os indicadores
     indicators = create_indicators(ohlc, **kwargs)
-    # Calculando o rótulo
     y = np.array(labelData(ohlc["Adj Close"].to_numpy())).ravel()
-    # Eliminando as linhas com NaN
     indicators["y"] = y
     indicators = indicators.dropna()
 
     # Separando os dados em treino e backtest
     indicators_train, indicators_backtest = train_backtest_split(indicators, year)
 
-    # Convertendo para numpy arrays, caso ainda não estejam
+    # Convertendo para numpy arrays
     X = np.array(indicators_train)[:, :-1]
     y = np.array(indicators_train)[:, -1]
+
+    selected_columns = indicators_train.columns[:-1]  # Nomes das colunas originais
+    if n_features:
+        # Seleção de features
+        base_model = RandomForestClassifier(n_estimators=n_estimators, random_state=42)
+        base_model.fit(X, y)
+        selector = SelectFromModel(base_model, max_features=n_features, threshold=-np.inf)
+        X = selector.transform(X)
+        X_backtest = selector.transform(np.array(indicators_backtest)[:, :-1])
+        selected_columns = np.array(indicators_train.columns[:-1])[selector.get_support()]  # Atualiza com as selecionadas
+    else:
+        X_backtest = np.array(indicators_backtest)[:, :-1]  # Make sure this is used
 
     # Se for ativada a binarização...
     if binarized:
@@ -76,8 +96,8 @@ def backtesting_model(ohlc, binarized, year = None, n_estimators = 100, **kwargs
         model_sell.fit(X, y_sell)
 
         # Prediz a política para o ano de backtest
-        policy_buy = model_buy.predict(np.array(indicators_backtest)[:, :-1])
-        policy_sell = model_sell.predict(np.array(indicators_backtest)[:, :-1])
+        policy_buy = model_buy.predict(X_backtest)  # Use X_backtest
+        policy_sell = model_sell.predict(X_backtest)  # Use X_backtest
 
         policy = policy_buy + policy_sell
 
@@ -87,14 +107,15 @@ def backtesting_model(ohlc, binarized, year = None, n_estimators = 100, **kwargs
         model.fit(X, y)
 
         # Prediz a política para aquele ano
-        policy = model.predict(np.array(indicators_backtest)[:, :-1])
+        policy = model.predict(X_backtest)  # Use X_backtest
 
     # Exibindo os resultados do modelo
-    # print(classification_report(np.array(indicators_backtest)[:, -1], policy))
+    if show_report == True:
+        print(classification_report(np.array(indicators_backtest)[:, -1], policy))
     report = classification_report(np.array(indicators_backtest)[:, -1], policy, output_dict=True)
-    accuracy = report['accuracy']
+    accuracy = report["accuracy"]
 
     # Juntando a política com os dados originais
     ohlc_backtest = adjust_policy_data(ohlc, year, policy)
 
-    return ohlc_backtest, accuracy
+    return ohlc_backtest, accuracy, report ,selected_columns
