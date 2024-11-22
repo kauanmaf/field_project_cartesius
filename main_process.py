@@ -66,9 +66,9 @@ def main_process(files: list, len_indic: np.array, year_backtest: int, year_val:
 
             # Se a tunagem estiver ativada, otimiza os hiperparâmetros
             if tune:
-                study_params, study_value = run_optimization(DATA, binarized, year_val, TICKER, n_trials=100, k_best=n_colunas)
+                study_params, study_value = run_optimization(DATA, binarized, year_val, TICKER, n_trials=5, k_best=n_colunas)
                 # Salva os parâmetros otimizados e o valor de desempenho no dicionário
-                json_ticker[n_colunas] = {"params": study_params, "value": study_value}
+                json_ticker[f"{n_colunas}"] = {"params": study_params, "value": study_value}
                 best_params = study_params
             else:
                 # Define o caminho para o arquivo de hiperparâmetros
@@ -85,8 +85,8 @@ def main_process(files: list, len_indic: np.array, year_backtest: int, year_val:
                     if not test_columns:
                         best_params = dict_best_params[dict_best_params.keys()[0]]
                     # Caso contrário, verifica se n_colunas está nos parâmetros
-                    elif n_colunas in dict_best_params.keys():
-                        best_params = dict_best_params[n_colunas]["params"]
+                    elif f"{n_colunas}" in dict_best_params.keys():
+                        best_params = dict_best_params[f"{n_colunas}"]["params"]
 
             # Executa o modelo de backtesting com os melhores parâmetros ou parâmetros padrão
             if best_params is not None:

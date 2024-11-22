@@ -1,0 +1,1 @@
+{"3": {"params": {"n_estimators": 125, "mass_window_fast": 14, "mass_window_slow": 30, "dpo_window": 19}, "value": 13386.049396999988}, "4": {"params": {"n_estimators": 113, "atr_period": 16, "mass_window_fast": 13, "mass_window_slow": 20, "dpo_window": 23}, "value": 12691.793930999997}}
