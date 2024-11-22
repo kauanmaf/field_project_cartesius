@@ -12,8 +12,10 @@ def main_process(files: list, len_indic: np.array, year_backtest: int, year_val:
     final_results = []
 
     for element in files:
+        json_ticker = {}
         # Pega o ticker
         TICKER = element.split("\\")[-1][:-4]
+
         DATA = read_and_set_index(element)
 
         if not year_val or not year_backtest or year_val == year_backtest:
@@ -21,21 +23,27 @@ def main_process(files: list, len_indic: np.array, year_backtest: int, year_val:
             sys.exit()
 
         for n_colunas in len_indic:
+            best_params = None
             # Se a opção de tunagem for ativada, otimiza os hiperparâmetros
             if tune:
-                run_optimization(DATA, binarized, year_val, TICKER, n_trials=5, k_best=n_colunas)
+                study_params = run_optimization(DATA, binarized, year_val, TICKER, n_trials=5, k_best=n_colunas)
+                json_ticker[n_colunas] = study_params
+                best_params = study_params
+            else:
+                # Caminho do arquivo com os hiperparâmetros
+                hyperparams_path = os.path.join(
+                    "hyperparams",
+                    f"{TICKER}_{'b_' if binarized else ''}{year_val}.json"
+                )
 
-            # Caminho do arquivo com os hiperparâmetros
-            hyperparams_path = os.path.join(
-                "hyperparams",
-                f"{TICKER}_{'b_' if binarized else ''}{year_val}_{n_colunas}.json"
-            )
+                # Se o arquivo de hiperparâmetros existir, carrega os parâmetros
+                if os.path.exists(hyperparams_path):
+                    with open(hyperparams_path, "r") as f:
+                        dict_best_params = json.load(f)
+                    if f"{n_colunas}" in dict_best_params.keys():
+                        best_params = dict_best_params[f"{n_colunas}"]
 
-            # Se o arquivo de hiperparâmetros existir, carrega os parâmetros
-            if os.path.exists(hyperparams_path):
-                with open(hyperparams_path, "r") as f:
-                    best_params = json.load(f)
-
+            if best_params is not None:
                 policy, accuracy, dict_total, _ = backtesting_model(DATA, year_backtest, **best_params)
             else:
                 try:
@@ -74,6 +82,10 @@ def main_process(files: list, len_indic: np.array, year_backtest: int, year_val:
 
         if not test_columns:
             break  # Sai do loop de LEN_INDIC caso TEST_COLUMNS esteja desativado
+    
+        file_path =  os.path.join("hyperparams", f"{TICKER}_{'b_' if binarized else ''}{year_val}.json")
+        with open(file_path, "w") as f:
+            json.dump(json_ticker, f)
 
     # Converte a lista de resultados para um DataFrame
     final_df = pd.DataFrame(final_results)

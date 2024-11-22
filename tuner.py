@@ -91,6 +91,7 @@ def run_optimization(ohlc, binarized, year, ticker, k_best, n_trials=100):
     objective = create_objective(ohlc, binarized, year, k_best)
     study.optimize(objective, n_trials=n_trials)
 
+    return study.best_params
     # Save hyperparameters in a JSON file
     if binarized:
         file_path = os.path.join("hyperparams", f"{ticker}_b_{year}_{k_best}.json")
