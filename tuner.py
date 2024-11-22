@@ -6,11 +6,12 @@ import labeling as lb
 from backtesting import Backtest, Strategy
 import json
 
+
 # Função para criar a função objetivo
-def create_objective(ohlc, binarized, year, lista_colunas):
-    # Cria a função objetivo    
+def create_objective(ohlc, binarized, year, k_best):
+    # Cria a função objetivo
     def objective(trial):
-        # Dictionary mapping indicators to their associated hyperparameters
+        # Dicinário mapeando 
         hyperparams_mapping = {
             "adx": {"adx_period": (10, 30)},
             "atr": {"atr_period": (10, 30)},
@@ -59,43 +60,42 @@ def create_objective(ohlc, binarized, year, lista_colunas):
         params = {}
         params["n_estimators"] = trial.suggest_int("n_estimators", 60, 140)
 
-        # Loop through hyperparameters and filter by lista_colunas
-        for indicador, hyperparams in hyperparams_mapping.items():
-            if indicador in lista_colunas:
+        # Run backtesting model with k_best to determine selected features
+        ohlc_backtest, _,_, selected_features = backtesting_model(
+            ohlc, binarized, year, n_estimators=params["n_estimators"], n_features = k_best
+        )
+
+        # Suggest hyperparameters for selected features only
+        for feature in selected_features:
+            if feature in hyperparams_mapping:
+                hyperparams = hyperparams_mapping[feature]
                 for param, bounds in hyperparams.items():
                     if isinstance(bounds[0], int):
                         params[param] = trial.suggest_int(param, bounds[0], bounds[1])
                     elif isinstance(bounds[0], float):  # Float range
                         params[param] = trial.suggest_float(param, bounds[0], bounds[1])
-  
-        # Calculating the policy dynamically
-        ohlc_backtest = backtesting_model(
-            ohlc,
-            binarized,
-            year,
-            **params,
-        )
 
-        bt = Backtest(ohlc_backtest[0], OurStrategy, cash=10000)
+        # Run the backtest
+        bt = Backtest(ohlc_backtest, OurStrategy, cash=10000)
         stats = bt.run()
         score = stats["Equity Final [$]"]
 
         return score
-    
+
     return objective
 
 # Função que otimiza os hiperparâmetros
-def run_optimization(ohlc, binarized, year, ticker, lista_colunas: list, n_trials = 100):
-    # Criando o estudo e realizando a otimização
-    study = optuna.create_study(direction = "maximize")
-    objective = create_objective(ohlc, binarized, year, lista_colunas)
-    study.optimize(objective, n_trials = n_trials)
-    
-    # Escrevendo os hiperparâmetros no JSON adequado
+def run_optimization(ohlc, binarized, year, ticker, k_best, n_trials=100):
+    # Create the study and run optimization
+    study = optuna.create_study(direction="maximize")
+    objective = create_objective(ohlc, binarized, year, k_best)
+    study.optimize(objective, n_trials=n_trials)
+
+    # Save hyperparameters in a JSON file
     if binarized:
-        file_path = os.path.join("hyperparams", f"{ticker}_b_{year}_{len(lista_colunas)}.json")
+        file_path = os.path.join("hyperparams", f"{ticker}_b_{year}_{k_best}.json")
     else:
-        file_path = os.path.join("hyperparams",f"{ticker}_{year}_{len(lista_colunas)}.json")
+        file_path = os.path.join("hyperparams", f"{ticker}_{year}_{k_best}.json")
 
     with open(file_path, "w") as f:
         json.dump(study.best_params, f)
