@@ -13,17 +13,6 @@ def create_indicators(ohlc, **kwargs):
     indicators = normalize_indicators(indicators)
     return indicators
 
-# # Função para pegar o nome das colunas
-# def get_columns_name(ohlc, k_best):
-#     # Calcula e agrega todos os indicadores
-#     indicators = agg_indicators(ohlc)
-#     # Normaliza eles
-#     indicators = normalize_indicators(indicators)
-#     # Retirando indicadores correlacionados
-#     indicators = decorrelate(indicators, k_best=k_best)
-#     lista_colunas = [nome.lower() for nome in indicators.columns]
-#     return indicators.columns
-
 # Função para separar os dados de treino e backtest
 def train_backtest_split(indicators, year = None):
     # Se tiver um ano específico, separa ele para backtest
