@@ -21,7 +21,7 @@ YEAR_VAL = 2023
 # Variável para ativar ou desativar a tunagem
 TUNE = True
 # Variável para ativar ou desativar a binarização dos dados
-BINARIZED = False
+BINARIZED = True
 # Variável para testar várias quantidades de colunas
 TEST_COLUMS = True
 
