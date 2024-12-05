@@ -7,7 +7,7 @@ import sys
 import glob
 
 # Função principal para processar dados, realizar tunagem de hiperparâmetros, executar backtesting e salvar resultados
-def main_process(files: list, len_indic: np.array, year_backtest: int, year_val: int, tune: bool, binarized: bool, test_columns: bool, volatility_df: pd.DataFrame, n_trials = 100):
+def main_process(files: list, len_indic: np.array, year_backtest: int, year_val: int, tune: bool, binarized: bool, test_columns: bool, volatility_df: pd.DataFrame, n_trials = 100, plot = False):
     """
     Processa uma lista de arquivos contendo dados financeiros, executa tunagem de hiperparâmetros (se ativada), 
     realiza backtesting e gera resultados consolidados.
@@ -103,7 +103,8 @@ def main_process(files: list, len_indic: np.array, year_backtest: int, year_val:
             # Configura e executa o backtesting com a biblioteca Backtest
             bt = Backtest(policy, OurStrategy, cash=10000)
             stats = bt.run()
-            bt.plot()
+            if plot:
+                bt.plot()
 
             # Extrai o retorno percentual e a taxa de vitória
             percent_return = stats["Return [%]"]
