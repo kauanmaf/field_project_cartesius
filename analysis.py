@@ -69,7 +69,7 @@ def plot_graphs_style(df, x_col, y_col, title, normal_value,
 
     # Configurações do gráfico
     sns.set_theme(style="whitegrid")
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(12, 9))
 
     # Criar o scatterplot
     sns.scatterplot(data=df, x=x_col, y=y_col,s= 100, color=palette, legend=show_legend)
@@ -82,7 +82,7 @@ def plot_graphs_style(df, x_col, y_col, title, normal_value,
         texts.append(plt.text(df[x_col].iloc[i], 
                               df[y_col].iloc[i] + offset, 
                               ticker, 
-                              fontsize=9, 
+                              fontsize=13, 
                               ha='center', 
                               va='center', 
                               font=font))
@@ -96,8 +96,8 @@ def plot_graphs_style(df, x_col, y_col, title, normal_value,
 
     # Ajustes no gráfico
     plt.title(title, fontsize=14, font=font, color="black")
-    plt.xlabel(x_col, font=font, color="black")
-    plt.ylabel(y_col, font=font, color="black")
+    plt.xlabel(x_col, font=font, color="black",fontsize=18)
+    plt.ylabel(y_col, font=font, color="black",fontsize=18)
     
     if show_legend:
         plt.legend(frameon=False)
