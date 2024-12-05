@@ -107,3 +107,94 @@ def plot_graphs_style(df, x_col, y_col, title, normal_value,
 
     # Exibir o gráfico
     plt.show()
+
+positions = {(0, 0): "AZUL4.SA",
+             (1, 0): "PRIO3.SA",
+             (0, 1): "TSLA",
+             (1, 1): "VIVA3.SA"}
+
+def r_squared(poly1d_fn, x, y):
+    # Calculando o R²
+    y_pred = poly1d_fn(x)  # Valores previstos pela regressão
+    ss_res = np.sum((y - y_pred) ** 2)  # Soma dos quadrados dos resíduos
+    ss_tot = np.sum((y - np.mean(y)) ** 2)  # Soma dos quadrados totais
+    r_squared = 1 - (ss_res / ss_tot)  # Cálculo do R²
+
+    return r_squared
+
+
+def linear_regression(x, y):
+    coef = np.polyfit(x, y, 1)  # Coeficientes da regressão linear
+    poly1d_fn = np.poly1d(coef)
+
+    return poly1d_fn
+
+
+def plot_graph(data_x, data_y, xmin, xmax, ymin, ymax, axes, row, column, graph, title, label = None, regression = False, color = "#1c285c", font = None):
+    if graph == "bar":
+        axes[row, column].bar(data_x["data"], data_y["data"], label = label, color = color)
+    elif graph == "scatter":
+        axes[row, column].scatter(data_x["data"], data_y["data"], label = label,  color = color)
+    else:
+        axes[row, column].plot(data_x["data"], data_y["data"], label = label,  color = color)
+        
+    if regression:
+        poly1d_fn = linear_regression(data_x["data"], data_y["data"])
+        r2 = round(r_squared(poly1d_fn, data_x["data"], data_y["data"]), 2)
+        axes[row, column].plot(data_x["data"], poly1d_fn(data_x["data"]), color='red', label=rf"$R^2$ = {r2}")
+        axes[row, column].legend()
+
+    axes[row, column].set_title(title, font = font, color = "black")
+    axes[row, column].set_xlim(xmin, xmax)
+    axes[row, column].set_ylim(ymin, ymax)
+
+
+def plot_graphs(data, x, y, graph, both = False, regression = False, font = None):
+    fig, axes = plt.subplots(2, 2)
+    axes.flatten()
+
+    data_x = pd.DataFrame()
+    data_y = pd.DataFrame()
+
+    data_x["Stock"] = data["Stock"]
+    data_y["Stock"] = data["Stock"]
+
+    data_x["binarized"] = data["binarized"]
+    data_y["binarized"] = data["binarized"]
+
+    if "/" in x:
+        trade, stat = x.split("/")
+        data_x["data"] = data["Total Dict"].apply(lambda x: x[trade][stat])
+    else:
+        data_x["data"] = data[x]
+
+    if "/" in y:
+        trade, stat = y.split("/")
+        data_y["data"] = data["Total Dict"].apply(lambda x: x[trade][stat])
+    else:
+        data_y["data"] = data[y]
+
+    xmin, xmax = np.min(data_x["data"]), np.max(data_x["data"])
+    ymin, ymax = np.min(data_y["data"]), np.max(data_y["data"])
+
+    for position, title in positions.items():
+        if both:
+            plot_graph(data_x[(data_x["Stock"] == title) & (data_x["binarized"] == 0)], 
+                       data_y[(data_y["Stock"] == title) & (data_y["binarized"] == 0)], 
+                       xmin, xmax, ymin, ymax, axes, position[0], position[1], graph, title, label = "NB", regression = regression, color = "#FF8C00", font = font)
+            plot_graph(data_x[(data_x["Stock"] == title) & (data_x["binarized"] == 1)], 
+                       data_y[(data_y["Stock"] == title) & (data_y["binarized"] == 1)], 
+                       xmin, xmax, ymin, ymax, axes, position[0], position[1], graph, title, label = "B", regression = regression, font = font)
+            # axes[position[0], position[1]].legend()
+        else:
+            plot_graph(data_x[data_x["Stock"] == title], data_y[data_y["Stock"] == title], xmin, xmax, ymin, ymax, axes, position[0], position[1], graph, title, regression = regression,font = font)
+
+    axes[0, 0].set_ylabel(y, font = font,color = "black")
+    axes[1, 0].set_ylabel(y, font = font,color = "black")
+    axes[1, 0].set_xlabel(x, font = font,color = "black")
+    axes[1, 1].set_xlabel(x, font = font,color = "black")
+
+    # fig.suptitle(f"{x} x {y}", font = font)
+
+    plt.tight_layout()
+    plt.show()
