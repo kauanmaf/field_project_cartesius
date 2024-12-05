@@ -11,18 +11,19 @@ with open("data/new_stocks/volatility.json", "r") as f:
 # Converte os dados de volatilidade para um DataFrame
 volatility_df = pd.DataFrame(volatility)
 
-FILES = glob.glob("data/*.csv")
+FILES = glob.glob("data/new_stocks/*.csv")
 
-LEN_INDIC = np.arange(3,28)  # Intervalo de tamanhos para k_best
+# LEN_INDIC = np.arange(3,28)  # Intervalo de tamanhos para k_best
+LEN_INDIC = [12]
 # Ano no qual será feito o backtest
 YEAR_BACKTEST = 2024
 # Ano a ser usado como validação da tunagem de hiperparâmetros
 YEAR_VAL = 2023
 # Variável para ativar ou desativar a tunagem
-TUNE = True
+TUNE = False
 # Variável para ativar ou desativar a binarização dos dados
 BINARIZED = True
 # Variável para testar várias quantidades de colunas
-TEST_COLUMS = True
+TEST_COLUMS = False
 
 main_process(FILES, LEN_INDIC, YEAR_BACKTEST, YEAR_VAL, TUNE, BINARIZED, TEST_COLUMS, volatility_df=volatility_df)

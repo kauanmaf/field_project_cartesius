@@ -83,7 +83,7 @@ def main_process(files: list, len_indic: np.array, year_backtest: int, year_val:
                         dict_best_params = json.load(f)
                     # Se test_columns não estiver ativo, usa o primeiro conjunto de parâmetros
                     if not test_columns:
-                        best_params = dict_best_params[dict_best_params.keys()[0]]
+                        best_params = dict_best_params[list(dict_best_params.keys())[0]]
                     # Caso contrário, verifica se n_colunas está nos parâmetros
                     elif f"{n_colunas}" in dict_best_params.keys():
                         best_params = dict_best_params[f"{n_colunas}"]["params"]
@@ -114,6 +114,10 @@ def main_process(files: list, len_indic: np.array, year_backtest: int, year_val:
                 vol = None  # Caso não exista informação de volatilidade
 
             # Cria um dicionário com os resultados obtidos
+            if test_columns == True:
+                selected_features = list(best_params.keys()) if 'best_params' in locals() else []
+            else:
+                selected_features = None
             teste = {
                 "Stock": TICKER,
                 "Features": n_colunas,
@@ -122,7 +126,7 @@ def main_process(files: list, len_indic: np.array, year_backtest: int, year_val:
                 "Win Rate": win_rate,
                 "Accuracy Test": accuracy,
                 "Total Dict": dict_total,
-                "Selected Features": list(best_params.keys()) if 'best_params' in locals() else []
+                "Selected Features": selected_features
             }
             # Adiciona os resultados à lista final
             final_results.append(teste)
