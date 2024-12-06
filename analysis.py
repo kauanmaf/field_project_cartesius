@@ -29,7 +29,7 @@ def test_accuracy(data):
         bt = Backtest(data_copy, OurStrategy, cash=10000)
         stats = bt.run()
 
-        equities[accuracy] = stats["Equity Final [$]"]
+        equities[accuracy] = max(0.001, stats["Equity Final [$]"])
 
     return equities
 
@@ -185,7 +185,7 @@ def plot_graphs(data, x, y, graph, both = False, regression = False, font = None
             plot_graph(data_x[(data_x["Stock"] == title) & (data_x["binarized"] == 1)], 
                        data_y[(data_y["Stock"] == title) & (data_y["binarized"] == 1)], 
                        xmin, xmax, ymin, ymax, axes, position[0], position[1], graph, title, label = "B", regression = regression, font = font)
-            # axes[position[0], position[1]].legend()
+            axes[position[0], position[1]].legend()
         else:
             plot_graph(data_x[data_x["Stock"] == title], data_y[data_y["Stock"] == title], xmin, xmax, ymin, ymax, axes, position[0], position[1], graph, title, regression = regression,font = font)
 
@@ -194,7 +194,7 @@ def plot_graphs(data, x, y, graph, both = False, regression = False, font = None
     axes[1, 0].set_xlabel(x, font = font,color = "black")
     axes[1, 1].set_xlabel(x, font = font,color = "black")
 
-    # fig.suptitle(f"{x} x {y}", font = font)
+    fig.suptitle(f"{x} x {y}", font = font)
 
     plt.tight_layout()
     plt.show()
