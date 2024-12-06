@@ -251,7 +251,7 @@ def plot_frequencia_indicarores():
     contagens_ajustadas_ordenadas = contagens_ajustadas.sort_values(ascending=False)
 
     # Criando gráfico de frequências de indicaodres utilizados
-    plt.figure(figsize=(9, 5))
+    plt.figure(figsize=(12, 9))
     sns.barplot(x=contagens_ajustadas_ordenadas.index, y=contagens_ajustadas_ordenadas.values, color="#1c285c")
     plt.title("Frequências de melhores indicadores selecionados para todas as empresas")
     plt.xlabel("Indicador")
