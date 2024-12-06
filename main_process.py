@@ -7,7 +7,7 @@ import sys
 import glob
 
 # Função principal para processar dados, realizar tunagem de hiperparâmetros, executar backtesting e salvar resultados
-def main_process(files: list, len_indic: np.array, year_backtest: int, year_val: int, tune: bool, binarized: bool, test_columns: bool, volatility_df: pd.DataFrame, n_trials = 100):
+def main_process(files: list, len_indic: np.array, year_backtest: int, year_val: int, tune: bool, binarized: bool, test_columns: bool, volatility_df: pd.DataFrame, n_trials = 100, plot = False):
     """
     Processa uma lista de arquivos contendo dados financeiros, executa tunagem de hiperparâmetros (se ativada), 
     realiza backtesting e gera resultados consolidados.
@@ -83,17 +83,18 @@ def main_process(files: list, len_indic: np.array, year_backtest: int, year_val:
                         dict_best_params = json.load(f)
                     # Se test_columns não estiver ativo, usa o primeiro conjunto de parâmetros
                     if not test_columns:
-                        best_params = dict_best_params[list(dict_best_params.keys())[0]]
+                        n_colunas = list(dict_best_params.keys())[0]
+                        best_params = dict_best_params[n_colunas]
                     # Caso contrário, verifica se n_colunas está nos parâmetros
                     elif f"{n_colunas}" in dict_best_params.keys():
                         best_params = dict_best_params[f"{n_colunas}"]["params"]
 
             # Executa o modelo de backtesting com os melhores parâmetros ou parâmetros padrão
             if best_params is not None:
-                policy, accuracy, dict_total, _ = backtesting_model(DATA, year_backtest, **best_params)
+                policy, accuracy, dict_total, _ = backtesting_model(DATA, binarized, year_backtest, **best_params)
             else:
                 try:
-                    policy, accuracy, dict_total, _ = backtesting_model(DATA, year_backtest)
+                    policy, accuracy, dict_total, _ = backtesting_model(DATA, binarized, year_backtest)
                 except Exception as e:
                     # Captura erros durante o backtesting
                     print(f"Erro ao executar o backtesting para {TICKER} com {n_colunas} indicadores: {e}")
@@ -102,6 +103,7 @@ def main_process(files: list, len_indic: np.array, year_backtest: int, year_val:
             # Configura e executa o backtesting com a biblioteca Backtest
             bt = Backtest(policy, OurStrategy, cash=10000)
             stats = bt.run()
+            bt.plot()
 
             # Extrai o retorno percentual e a taxa de vitória
             percent_return = stats["Return [%]"]
@@ -148,5 +150,4 @@ def main_process(files: list, len_indic: np.array, year_backtest: int, year_val:
     final_df = pd.DataFrame(final_results)
 
     # Exibe e salva os resultados finais em um arquivo CSV
-    print(final_df)
     final_df.to_csv("results.csv", index=False)

@@ -47,12 +47,13 @@ def fetch_stocks_above_volume(data, volume_threshold=10_000_000):
 def calculate_volatility(ticker, data):
     # Filter for 2024 data
     data_stock = data[data.index > "2023-12-31"].copy()
+    size = len(data_stock)
     try:
         # Calculate log returns
         data_stock['Log Return'] = np.log(data_stock['Adj Close'] / data_stock['Adj Close'].shift(1))
 
         # Calculate annualized volatility
-        volatility = np.std(data_stock['Log Return'].dropna()) * np.sqrt(252)
+        volatility = np.std(data_stock['Log Return'].dropna()) * np.sqrt(size)
         return volatility
     except Exception as e:
         print(f"Failed to calculate volatility for {ticker}: {e}")
