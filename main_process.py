@@ -103,8 +103,7 @@ def main_process(files: list, len_indic: np.array, year_backtest: int, year_val:
             # Configura e executa o backtesting com a biblioteca Backtest
             bt = Backtest(policy, OurStrategy, cash=10000)
             stats = bt.run()
-            if plot:
-                bt.plot()
+            bt.plot()
 
             # Extrai o retorno percentual e a taxa de vitória
             percent_return = stats["Return [%]"]
