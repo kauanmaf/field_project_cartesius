@@ -252,16 +252,6 @@ def labelData(data: np.array, h: int=3 , span: int=5, triple_barrier: bool=True,
     else:
         return labelDataFixedHorizon(data, h, span)
 
-# Função só pra ter uma ideia do calculao pra volatilidade diária.
-def getDailyVol(close,span0=5):
-    # daily vol, reindexed to close
-    df0=close.index.searchsorted(close.index-pd.Timedelta(days=1))
-    df0=df0[df0>0]
-    df0=pd.Series(close.index[df0 - 1], index=close.index[close.shape[0]-df0.shape[0]:])
-    df0=close.loc[df0.index]/close.loc[df0.values].values-1 # daily returns
-    
-    return df0
-
 tsla_data = read_and_set_index("data/TSLA.csv")
 prices = tsla_data["Adj Close"].to_numpy()
 label_tsla_data = labelData(prices)
