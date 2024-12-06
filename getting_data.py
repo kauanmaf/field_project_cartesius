@@ -1,3 +1,7 @@
+"""
+Modulo para pegar os dados das ações com volume de movimentação diária maior que 10 milhões
+"""
+
 import pandas as pd
 import numpy as np
 import yfinance as yf

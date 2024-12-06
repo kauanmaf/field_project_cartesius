@@ -1,6 +1,32 @@
+"""
+Módulo que contém funções utilitárias que foram usadas ao longo do trabalho
+"""
 import pandas as pd
 from backtesting import Strategy, Backtest
+from dotenv import load_dotenv
+import os
+from pathlib import Path
 
+def carregar_caminho_fonte():
+    # Carregar variáveis de ambiente
+    load_dotenv()
+
+    # Tentar obter o caminho da fonte a partir da variável de ambiente
+    FONT_PATH = os.environ.get("PATH_FONT")
+
+    # Verificar se o caminho da fonte está presente e é válido
+    if FONT_PATH:
+        # Verificar se o caminho especificado existe
+        if os.path.exists(FONT_PATH):
+            # Retornar o caminho válido
+            return Path(FONT_PATH)
+        else:
+            print(f"O caminho da fonte não existe: {FONT_PATH}")
+            return None
+    else:
+        print("O caminho da fonte não foi encontrado na variável de ambiente.")
+        return None
+    
 def read_and_set_index(file_csv):
     data = pd.read_csv(file_csv)
     data["Date"] = pd.to_datetime(data["Date"])

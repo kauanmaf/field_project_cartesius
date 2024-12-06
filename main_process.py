@@ -1,3 +1,6 @@
+"""
+Módulo pra realizar o processo principal
+"""
 import pandas as pd
 import json
 import os

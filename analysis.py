@@ -1,3 +1,6 @@
+"""
+Módulo o qual serviu para análise dos nossos gráficos. Responsável por fazer gráficos do report.ipynb
+"""
 from labeling import *
 from trading_utils import *
 from backtesting_process import *
@@ -143,11 +146,11 @@ def plot_graph(data_x, data_y, xmin, xmax, ymin, ymax, axes, row, column, graph,
         poly1d_fn = linear_regression(data_x["data"], data_y["data"])
         r2 = round(r_squared(poly1d_fn, data_x["data"], data_y["data"]), 2)
         axes[row, column].plot(data_x["data"], poly1d_fn(data_x["data"]), color='red', label=rf"$R^2$ = {r2}")
-        axes[row, column].legend()
 
     axes[row, column].set_title(title, font = font, color = "black")
     axes[row, column].set_xlim(xmin, xmax)
     axes[row, column].set_ylim(ymin, ymax)
+    axes[row, column].grid(False)
 
 
 def plot_graphs(data, x, y, graph, both = False, regression = False, font = None):
@@ -186,7 +189,12 @@ def plot_graphs(data, x, y, graph, both = False, regression = False, font = None
             plot_graph(data_x[(data_x["Stock"] == title) & (data_x["binarized"] == 1)], 
                        data_y[(data_y["Stock"] == title) & (data_y["binarized"] == 1)], 
                        xmin, xmax, ymin, ymax, axes, position[0], position[1], graph, title, label = "B", regression = regression, font = font)
-            axes[position[0], position[1]].legend()
+            
+            if position in [(0, 1), (1, 1)]:
+                axes[position[0], position[1]].legend(
+                    loc="upper left",
+                    bbox_to_anchor=(1.05, 1),
+                    borderaxespad=0)
         else:
             plot_graph(data_x[data_x["Stock"] == title], data_y[data_y["Stock"] == title], xmin, xmax, ymin, ymax, axes, position[0], position[1], graph, title, regression = regression,font = font)
 
@@ -201,9 +209,9 @@ def plot_graphs(data, x, y, graph, both = False, regression = False, font = None
     plt.show()
 
 # Plot de frequência de indicadores
-def plot_frequencia_indicarores():
+def plot_frequencia_indicadores():
     # Carregando dataset
-    df_resultado_junto = pd.read_csv("resultado_junto.csv")
+    df_resultado_junto = pd.read_csv("results/resultado_junto.csv")
 
     # Transformando strings em listas
     df_resultado_junto["Selected Features"] = df_resultado_junto["Selected Features"].apply(ast.literal_eval)

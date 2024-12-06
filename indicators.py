@@ -1,3 +1,6 @@
+"""
+Módulo que implementa todos os indicadores usados no projeto
+"""
 import numpy as np
 import pandas as pd
 from trading_utils import *

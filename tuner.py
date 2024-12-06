@@ -1,4 +1,6 @@
-import os
+"""
+Função que implementa a otimização com a biblioteca OPTUNA
+"""
 from indicators import *
 from backtesting_process import *
 import optuna

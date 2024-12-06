@@ -1,3 +1,6 @@
+"""
+Módulo o qual serviu para criar juntar todos os indicadores que rivemos, bem como criar os sinais.
+"""
 from indicators import *
 from labeling import *
 from sklearn.ensemble import RandomForestClassifier
