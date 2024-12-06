@@ -15,17 +15,7 @@ Foi implementado um sistema que alterna entre o método de barreira tripla e o m
 ## Modelos de Machine Learning
 
 Após a extração e normalização dos dados, três modelos de *machine learning* foram testados para prever os sinais de operação:
-
-### 1. Rede Neural
-A Rede Neural imita o funcionamento do cérebro humano, utilizando camadas de neurônios artificiais para realizar classificações ou previsões. Com o treinamento adequado, as redes neurais conseguem identificar padrões complexos nos dados.
-
-### 2. Random Forest
-O algoritmo Random Forest constrói múltiplas árvores de decisão, cada uma treinada com um subconjunto diferente dos dados. O modelo final é determinado por uma votação majoritária ou pela média dos resultados das árvores.
-
-### 3. Gradient Boosting
-O Gradient Boosting constrói uma sequência de modelos fracos, com cada modelo tentando corrigir os erros do anterior. A técnica é poderosa para minimizar erros e gerar previsões de alta qualidade.
-
-Após testes preliminares, o **Random Forest** foi escolhido devido à sua eficiência computacional e bom desempenho em comparação com outros modelos mais complexos.
+redes neurais, random forest, gradient boosting. Após testes preliminares, o **Random Forest** foi escolhido devido à sua eficiência computacional e bom desempenho em comparação com outros modelos mais complexos.
 
 ## Indicadores
 
@@ -58,7 +48,7 @@ O modelo foi projetado para ser validado e treinado em qualquer ano específico,
 
 ## Fluxograma do Processo
 
-Abaixo, um fluxograma criado com **Mermaid** para ilustrar o processo de desenvolvimento do modelo.
+Abaixo, um fluxograma para ilustrar o processo de desenvolvimento do modelo.
 
 ```mermaid
 flowchart TD

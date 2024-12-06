@@ -14,3 +14,4 @@ six==1.16.0
 tornado==6.4.1
 tzdata==2024.2
 xyzservices==2024.9.0
+optuna==4.0.0
