@@ -11,7 +11,7 @@ with open("data/new_stocks/volatility.json", "r") as f:
 # Converte os dados de volatilidade para um DataFrame
 volatility_df = pd.DataFrame(volatility)
 
-FILES = glob.glob("data/new_stocks/*.csv")
+FILES = glob.glob("data/*.csv")
 
 LEN_INDIC = np.arange(3,28)  # Intervalo de tamanhos para k_best
 # Ano no qual será feito o backtest
