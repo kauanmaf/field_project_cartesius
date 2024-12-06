@@ -1,3 +1,6 @@
+"""
+Módulo que contém a rotulagem dos dados
+"""
 import numpy as np
 from trading_utils import *
 

@@ -12,6 +12,7 @@
 \usepackage{minted}
 \usepackage{xurl}
 \usepackage{float}
+\usepackage{csquotes}
 \usepackage[a4paper, left=4cm, right=4cm]{geometry}
 \usepackage{colortbl}
 \usepackage[backend=biber,style=numeric]{biblatex}
@@ -93,15 +94,60 @@ Segue o link do repositório no qual o projeto foi desenvolvido: \url{https://gi
 
 \section{Rotulador}
 
-A rotulagem dos dados foi realizada utilizando o \textbf{método de barreira tripla}, conforme descrito por Prado \cite{Prado}. Este método é utilizado para gerar rótulos (0,1,-1) a partir de uma série de preços, considerando três condições principais: a \textbf{barreira de stop-loss}, a \textbf{barreira de profit-taking} e uma \textbf{barreira de tempo}. O objetivo dessa abordagem é determinar se uma operação financeira é bem-sucedida (atinge o lucro esperado), fracassa (atinge o limite de perda) ou é encerrada após um \textit{período determinado}, independentemente do desempenho.
+O método escolhido para rotulagem dos dados é método de barreira tripla \cite{Prado}, que funciona da seguinte maneira: para um horizonte de tempo $h$ são definidas três barras: duas horizontais que definem os limiares \textit{profit-taking} e o \textit{stop-loss} para o retorno daquele período e uma terceira vertical que é atingida caso nenhuma das barras verticais seja cruzada antes do fim do horizonte de tempo $h$. Caso as barras horizontais sejam cruzadas, o algoritmo rotula aquele período como 1 (deve-se ficar comprado) se a barra superior for atingida, ou como -1 (deve-se ficar vendido). Se a barra vertical for atingida, temos uma tendência à média 0 e o dado é rotulado como 0 (ficar inerte)
 
-A função de rotulagem aplicada nos dados analisa as variações dos preços dentro de um \textit{horizonte de tempo fixado} (\emph{h}) e calcula os \textbf{retornos logarítmicos diários}. Para determinar as barreiras de \textbf{stop-loss} e \textbf{profit-taking}, é utilizado o desvio padrão móvel ponderado exponencialmente \textbf{(EWMSD)}, o qual permite ajustar as barreiras de acordo com a volatilidade observada ao longo do tempo.
+\subsection{Retornos Logaritmicos}
 
-Além disso, foi implementado um processo que permite \textbf{alternar} entre o uso do método de \textbf{barreira tripla} e o método de horizonte fixado, dependendo das condições de mercado e dos objetivos da análise. No caso do \textbf{método de horizonte fixado}, os rótulos são gerados com base nos \textbf{retornos acumulados dentro de um período específico}, considerando um \textit{limiar (threshold) dinâmico} para classificação.
+A rotulagem é feita utilizando o retorno logaritmico dos preços, que tem a seguinte fórmula:
 
-O método de barreira tripla é mais robusto ao considerar não apenas o retorno acumulado, mas também o comportamento do mercado em relação a limites de risco e lucro definidos previamente. Essa abordagem é particularmente útil em estratégias de trading, onde é necessário definir regras claras para o fechamento de posições.
+$$ r_t = ln \left( \frac{P_t}{P_{t - 1}} \right) $$
 
-A rotulagem gerada por essas técnicas fornece um conjunto de dados que pode ser utilizado como base para a construção de modelos preditivos, com o objetivo de prever a direção dos preços ou o desempenho das operações financeiras.
+onde:
+\begin{itemize}
+    \item $r_t$ é o retorno no tempo $t$
+    \item ${P_t}$ é o preço da ação no tempo $t$
+    \item $P_{t - 1}$ é o preço da ação no período de tempo anterior $t - 1$
+\end{itemize}
+
+\subsubsection{Por que retornos logaritmicos?}
+
+A escolha de retornos logaritmicos foi feita porque eles apresentam uma série de características vantajosas, dentre as quais cita-se algumas:
+
+\begin{itemize}
+    \item \textbf{Aditividade temporal (efeito composto)}: o retorno logaritmico é aditivo temporalmente, isto é, o retorno total sobre múltiplos períodos de tempo é igual à soma dos retornos logaritmicos individuais. Como dados financeiros geralmente apresentam um comportamento cumulativo ao longo do tempo, o uso de retornos logaritmicos é mais adequado, principalmente com longos intervalos temporais. \cite{Hull}
+    \item \textbf{Mais estabilidade e robustez frente grandes flutuações}: grandes flutuações em preços são mais estabilizados pela medida logaritmica de retorno. Enquanto um retorno simples pode exagerar os efeitos de grandes mudanças de preços, o retorno logaritmico da uma perspectiva mais estável. \cite{Bouchaud}
+\end{itemize}
+
+\subsection{Limiares dinâmicos}
+
+Os limiares de \textit{profit-taking} e \textit{stop-loss} são definidos de acordo com o Desvio Padrão Móvel Ponderado Exponencialmente (\textit{EWMSD - Expontentially Weighted Moving Standard Deviation}), que, grosso modo, cálcula o desvio padrão móvel dos preços (semelhante à média móvel, mas para o desvio padrão) e os pondera de maneira exponencial, ou seja, priorizando a relevância de valores mais recentes e decaindo exponecialmente a relevância para valores mais antigos. Isso faz com que, mesmo que os preços recentes sejam os mais importantes para a compreensão da volatilidade, todo o movimento acumulado é relevante para se perceber uma tendência.
+
+\subsubsection{Fórmula do \textit{EWMSD}}
+Dada uma série de retornos $x_1, x_2, \dots, x_n$, segue-se os seguintes passos
+
+\begin{enumerate}
+    \item Calcula-se a \textbf{Média Móvel Ponderada Exponeniclamente (\textit{Exponentially weighted Moving Average - EWMA})}: $$EWMA_t = \lambda \cdot x_t + (1 - \lambda) \cdot EWMA_{t - 1}$$ onde:
+
+    \begin{itemize}
+        \item $\lambda$ é o fator de decaimento que determina quão rapidamente o peso para dados passados decai.
+        \item $x_t$ é o valor no tempo $t$
+        \item $EWMA_{t - 1}$ é a \textit{EWMA} do passo anterior
+    \end{itemize}
+    
+    \item Calcula-se a \textbf{Variância Ponderada Exponeniclamente (\textit{Exponentially weighted Moving Variance - EWMV})}: $$EWMV_t = \lambda \cdot (x_t - EWMA_t)^2 + (1 - \lambda) \cdot EWMV_{t - 1}$$.
+    
+    \item E por fim a \textbf{\textit{EWMSD}}: $$EWMSD_t = \sqrt{EWMV_t}$$
+\end{enumerate}
+
+\subsubsection{Por que \textit{EWMSD}?}
+
+\cite{Knight} O uso da \textit{EWMSD} é interessante por alguns motivos:
+
+\begin{itemize}
+    \item \textbf{Efeito de suavização}: Como o cálculo também da importância para valores passados de volatilidade, há uma maior robustez contra ruídos de valores no curto-prazo, o que é essencial para o bom treinamento de modelo de aprendizado de máquina. Contudo, como o peso dado aos valores ao longo do tempo decai exponencialmente, a \textit{EWMSD} ainda é bastante sensível a dados recentes, de forma que  reage em tempo hábil a mudanças de tendências.
+    
+    \item \textbf{Identificação de Acúmulos de Volatilidade}: a volatilidade em marcados tende a se acumular sobre períodos de tempo, com períodos de alta volatilidade tendendo a ser seguidos por períodos de mais alta volatilidade. A estatística ajuda a modelar esse comportamento se adaptando a volatilidades recentes enquanto recursivamente acumula volatilidades passadas
+\end{itemize}
 
 \newpage
 
