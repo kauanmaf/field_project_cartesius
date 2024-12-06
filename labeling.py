@@ -139,6 +139,15 @@ def labelDataFixedHorizon(data, h=3, span=5):
 def triple_barrier_labeling(prices, h, span, pt_factor=1, sl_factor=1):
     """
     Método de barreira tripla para rotulagem de dados financeiros.
+
+    Define três limiares para cada horizonte de tempo de `h` dias: um de 
+    profit-taking (com fator multiplicador `pt_factor`), uma de stop-loss 
+    (com fator multiplicador `sl_factor`) e uma que fica ao final do horizonte
+    de `h` de dias. Os limiares são definidos de acordo com a volatilidade
+    calculada utilizando EWMSD. Se o retorno no horizonte de tempo `h` su
+    perar a barreira de profit-taking, rotula como 1; se chegar a um valor
+    menor que stop-loss, rotula como -1; caso contrário, se os preços se 
+    mantiverem dentro da volatilidade esperada, rotula como 0.
     
     Parameters
     ----------
@@ -164,9 +173,9 @@ def triple_barrier_labeling(prices, h, span, pt_factor=1, sl_factor=1):
     
     # Calculando os retornos logarítmicos.
     returns = log_returns(prices)
+
     # Transformando numa série pandas para viabilizar cálculo do EWMSD.
     returns_series = pd.Series(returns)
-
     # Calculando desvio padrão móvel ponderado exponencialmente (EWMSD).
     ewmstd = returns_series.ewm(span=span).std()
 
@@ -183,7 +192,6 @@ def triple_barrier_labeling(prices, h, span, pt_factor=1, sl_factor=1):
         
         # Verifica qual barreira é tocada primeiro
         for cum_ret in cumulative_return:
-            
             if cum_ret >= upper_barrier:  # Barreira superior (profit-taking)
                 labels[i] = 1
                 break
