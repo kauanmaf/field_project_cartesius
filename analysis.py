@@ -2,6 +2,7 @@ from labeling import *
 from trading_utils import *
 from backtesting_process import *
 import matplotlib.pyplot as plt
+import ast
 
 def test_accuracy(data):
     data_copy = data.copy()
@@ -197,4 +198,63 @@ def plot_graphs(data, x, y, graph, both = False, regression = False, font = None
     fig.suptitle(f"{x} x {y}", font = font)
 
     plt.tight_layout()
+    plt.show()
+
+# Plot de frequência de indicadores
+def plot_frequencia_indicarores():
+    # Carregando dataset
+    df_resultado_junto = pd.read_csv("resultado_junto.csv")
+
+    # Transformando strings em listas
+    df_resultado_junto["Selected Features"] = df_resultado_junto["Selected Features"].apply(ast.literal_eval)
+    # Expandindo dataset colocando os indicadores em múltiplas linhas
+    df_resultado_junto = df_resultado_junto.explode("Selected Features")
+    # Retirando n_estimators
+    df_resultado_junto = df_resultado_junto[df_resultado_junto['Selected Features'] != "n_estimators"]
+
+    # Dicionários
+    dicionario_valores = {
+        "awesome_window": 2,
+        "kst": 9,
+        "stc": 4,
+        "mass_window": 2,
+    }
+    dicionario = {
+        "awesome_window1": "awesome_window",
+        "awesome_window2": "awesome_window",
+        "kst_n1": "kst",
+        "kst_n2": "kst",
+        "kst_n3": "kst",
+        "kst_n4": "kst",
+        "kst_r1": "kst",
+        "kst_r2": "kst",
+        "kst_r3": "kst",
+        "kst_r4": "kst",
+        "kst_signal": "kst",
+        "stc_window_fast": "stc",
+        "stc_window_slow": "stc",
+        "stc_smooth1": "stc",
+        "stc_smooth2": "stc",
+        "stc_cycle": "stc",
+        "mass_window_fast": "mass_window",
+        "mass_window_slow": "mass_window",
+    }
+
+    df_resultado_junto['Selected Features'] = df_resultado_junto['Selected Features'].replace(dicionario)
+
+    # Contando indicadores utilizados
+    contagem_indicadores = df_resultado_junto["Selected Features"].value_counts()
+
+    # Ajustando contagens para contar cada indicador uma única vez
+    contagens_ajustadas = contagem_indicadores / contagem_indicadores.index.map(dicionario_valores).fillna(1) 
+    # Ordenando contagens
+    contagens_ajustadas_ordenadas = contagens_ajustadas.sort_values(ascending=False)
+
+    # Criando gráfico de frequências de indicaodres utilizados
+    plt.figure(figsize=(9, 5))
+    sns.barplot(x=contagens_ajustadas_ordenadas.index, y=contagens_ajustadas_ordenadas.values, color="#1c285c")
+    plt.title("Frequências de melhores indicadores selecionados para todas as empresas")
+    plt.xlabel("Indicador")
+    plt.ylabel("Frequência")
+    plt.xticks(rotation=45, ha='right')
     plt.show()
