@@ -64,7 +64,7 @@
             
         \Large
         Escola de Matemática Aplicada\\
-        Fundação Getúlio Vargas\\
+        Fundação Getulio Vargas\\
         Rio de Janeiro, RJ - Brasil\\
         \today
             
@@ -78,27 +78,26 @@
 
 \section{Introdução}
 
-O mercado financeiro é caracterizado por sua alta complexidade e dinamicidade, onde a identificação de tendências desempenha um papel crucial na tomada de decisões estratégicas. Uma das abordagens mais populares para análise de dados financeiros é o uso de estratégias de \textit{trend following}. Esse método busca capturar movimentos persistentes no preço de ativos, aproveitando as tendências predominantes, seja em alta ou em baixa. A premissa subjacente é que, uma vez estabelecida, uma tendência tende a continuar por um período, permitindo que investidores ou sistemas automatizados realizem operações com base nesse padrão.
+O mercado financeiro é caracterizado por sua alta complexidade e dinamicidade, onde a identificação de tendências desempenha um papel crucial na tomada de decisões estratégicas. Uma das abordagens mais populares para análise de dados financeiros é o uso de estratégias de \textit{trend following}. Esse método busca capturar movimentos persistentes no preço de ativos, aproveitando as tendências predominantes, sejam de alta ou de baixa. A premissa subjacente é que, uma vez estabelecida, uma tendência tende a continuar por um período, permitindo que investidores ou sistemas automatizados realizem operações com base nesse padrão.
 
-Tradicionalmente, o \textit{trend following} tem sido implementado por meio de indicadores técnicos, como médias móveis e o \textit{MACD} (\textit{Moving Average Convergence Divergence}). Esses indicadores analisam dados históricos de preço e volume para gerar sinais de compra ou venda. No entanto, isoladamente, cada indicador possui limitações e está sujeito a falsos positivos, especialmente em mercados voláteis ou com mudanças rápidas de regime.
+Tradicionalmente, o \textit{trend following} tem sido implementado por meio de indicadores técnicos, como médias móveis e o \textit{MACD} (\textit{Moving Average Convergence Divergence}). Esses indicadores analisam dados históricos de preço e volume para gerar sinais de compra e venda. No entanto, isoladamente, cada indicador possui limitações e está sujeito a falsos positivos, especialmente em mercados voláteis ou com mudanças rápidas de regime.
 
 Com o avanço da tecnologia, o campo de \textit{machine learning} emergiu como uma solução poderosa para superar essas limitações. Modelos de aprendizado de máquina podem processar grandes volumes de dados e identificar padrões complexos que seriam difíceis de detectar manualmente. Ao integrar múltiplos indicadores técnicos e variáveis de mercado, esses modelos conseguem extrair insights mais robustos e tomar decisões mais informadas. Além disso, técnicas como \textit{ensemble learning} e redes neurais permitem combinar os pontos fortes de diferentes abordagens, resultando em previsões mais precisas e confiáveis.
 
-Este trabalho foi desenvolvido em parceria entre a Escola de Matemática Aplicada da Fundação Getulio Vargas (EMAp/FGV) e a Cartesius Capital, uma empresa que se posiciona como uma \textit{fundtech}, inovando na gestão de fundos multimercado com o uso de sistemas de inteligência artificial preditiva. Diferentemente de gestoras tradicionais, a Cartesius Capital combina métodos quantitativos avançados, tecnologia de ponta e análise situacional, para identificar oportunidades de investimento em ativos de elevada liquidez nos mercados financeiros globais.
+Este trabalho foi desenvolvido em parceria entre a Escola de Matemática Aplicada da Fundação Getulio Vargas (EMAp-FGV) e a Cartesius Capital, uma empresa que se posiciona como uma \textit{fundtech}, inovando na gestão de fundos multimercado com o uso de sistemas de inteligência artificial preditiva. Diferentemente de gestoras tradicionais, a Cartesius Capital combina métodos quantitativos avançados, tecnologia de ponta e análise situacional para identificar oportunidades de investimento em ativos de elevada liquidez nos mercados financeiros globais.
 
-O projeto é um \textit{side project} da Cartesius Capital, com a colaboração de alunos do quarto período da graduação em Ciência de Dados e Inteligência Artificial da EMAp/FGV. O objetivo central é criar um modelo de \textit{trend following} para ativo com poucos dados, e assim capitalizar oportunidades de mercado com maior frequência e eficácia. Por meio da integração de uma vasta gama de indicadores técnicos e algoritmos de aprendizado supervisionado, buscamos construir um sistema de suporte à decisão que não apenas detecte tendências, mas também se adapte às mudanças nas condições de mercado, mantendo uma performance consistente ao longo do tempo.
+O projeto é um \textit{side project} da Cartesius Capital, com a colaboração de alunos do quarto período da graduação em Ciência de Dados e Inteligência Artificial da EMAp-FGV. O objetivo central é criar um modelo de \textit{trend following} para ativo com poucos dados e assim capitalizar oportunidades de mercado com maior frequência e eficácia. Por meio da integração de uma vasta gama de indicadores técnicos e algoritmos de aprendizado supervisionado, buscamos construir um sistema de suporte à decisão que não apenas detecte tendências, mas também se adapte às mudanças nas condições de mercado, mantendo uma performance consistente ao longo do tempo.
 
-Segue o link do repositório no qual o projeto foi desenvolvido: \url{https://github.com/kauanmaf/field_project_cartesius}
+Segue o link do repositório no qual o projeto foi desenvolvido: \url{https://github.com/kauanmaf/field_project_cartesius}.
 
-\newpage
 
 \section{Rotulador}
 
-O método escolhido para rotulagem dos dados é método de barreira tripla \cite{Prado}, que funciona da seguinte maneira: para um horizonte de tempo $h$ são definidas três barras: duas horizontais que definem os limiares \textit{profit-taking} e o \textit{stop-loss} para o retorno daquele período e uma terceira vertical que é atingida caso nenhuma das barras verticais seja cruzada antes do fim do horizonte de tempo $h$. Caso as barras horizontais sejam cruzadas, o algoritmo rotula aquele período como 1 (deve-se ficar comprado) se a barra superior for atingida, ou como -1 (deve-se ficar vendido). Se a barra vertical for atingida, temos uma tendência à média 0 e o dado é rotulado como 0 (ficar inerte)
+O método escolhido para rotulagem dos dados é o método de barreira tripla \cite{Prado}, que funciona da seguinte maneira: para um horizonte de tempo $h$ são definidas três barras: duas horizontais que definem os limiares \textit{profit-taking} e o \textit{stop-loss} para o retorno daquele período e uma terceira, vertical, que é atingida caso nenhuma das barras verticais seja cruzada antes do fim do horizonte de tempo $h$. Caso as barras horizontais sejam cruzadas, o algoritmo rotula aquele período como 1 (deve-se ficar comprado) se a barra superior for atingida, ou como -1 (deve-se ficar vendido). Se a barra vertical for atingida, temos uma tendência à média 0 e o dado é rotulado como 0 (ficar inerte)
 
-\subsection{Retornos Logaritmicos}
+\subsection{Retornos Logarítmicos}
 
-A rotulagem é feita utilizando o retorno logaritmico dos preços, que tem a seguinte fórmula:
+A rotulagem é feita utilizando o retorno logarítmico dos preços, que tem a seguinte fórmula:
 
 $$ r_t = ln \left( \frac{P_t}{P_{t - 1}} \right) $$
 
@@ -109,32 +108,32 @@ onde:
     \item $P_{t - 1}$ é o preço da ação no período de tempo anterior $t - 1$
 \end{itemize}
 
-\subsubsection{Por que retornos logaritmicos?}
+\subsubsection{Por que retornos logarítmicos?}
 
-A escolha de retornos logaritmicos foi feita porque eles apresentam uma série de características vantajosas, dentre as quais cita-se algumas:
+A escolha de retornos logarítmicos foi feita porque eles apresentam uma série de características vantajosas, dentre as quais cita-se algumas:
 
 \begin{itemize}
-    \item \textbf{Aditividade temporal (efeito composto)}: o retorno logaritmico é aditivo temporalmente, isto é, o retorno total sobre múltiplos períodos de tempo é igual à soma dos retornos logaritmicos individuais. Como dados financeiros geralmente apresentam um comportamento cumulativo ao longo do tempo, o uso de retornos logaritmicos é mais adequado, principalmente com longos intervalos temporais. \cite{Hull}
-    \item \textbf{Mais estabilidade e robustez frente grandes flutuações}: grandes flutuações em preços são mais estabilizados pela medida logaritmica de retorno. Enquanto um retorno simples pode exagerar os efeitos de grandes mudanças de preços, o retorno logaritmico da uma perspectiva mais estável. \cite{Bouchaud}
+    \item \textbf{Aditividade temporal (efeito composto)}: o retorno logarítmico é aditivo temporalmente, isto é, o retorno total sobre múltiplos períodos de tempo é igual à soma dos retornos logarítmicos individuais. Como dados financeiros geralmente apresentam um comportamento cumulativo ao longo do tempo, o uso de retornos logarítmicos é mais adequado, principalmente com longos intervalos temporais. \cite{Hull}
+    \item \textbf{Mais estabilidade e robustez frente a grandes flutuações}: grandes flutuações em preços são mais estabilizados pela medida logaritmica de retorno. Enquanto um retorno simples pode exagerar os efeitos de grandes mudanças de preços, o retorno logarítmico dá uma perspectiva mais estável. \cite{Bouchaud}
 \end{itemize}
 
 \subsection{Limiares dinâmicos}
 
-Os limiares de \textit{profit-taking} e \textit{stop-loss} são definidos de acordo com o Desvio Padrão Móvel Ponderado Exponencialmente (\textit{EWMSD - Expontentially Weighted Moving Standard Deviation}), que, grosso modo, cálcula o desvio padrão móvel dos preços (semelhante à média móvel, mas para o desvio padrão) e os pondera de maneira exponencial, ou seja, priorizando a relevância de valores mais recentes e decaindo exponecialmente a relevância para valores mais antigos. Isso faz com que, mesmo que os preços recentes sejam os mais importantes para a compreensão da volatilidade, todo o movimento acumulado é relevante para se perceber uma tendência.
+Os limiares de \textit{profit-taking} e \textit{stop-loss} são definidos de acordo com o Desvio Padrão Móvel Ponderado Exponencialmente (\textit{EWMSD - Expontentially Weighted Moving Standard Deviation}), que, grosso modo, calcula o desvio padrão móvel dos preços (semelhante à média móvel, mas para o desvio padrão) e os pondera de maneira exponencial, ou seja, priorizando a relevância de valores mais recentes e decaindo exponecialmente a relevância para valores mais antigos. Isso faz com que, mesmo que os preços recentes sejam os mais importantes para a compreensão da volatilidade, todo o movimento acumulado é relevante para se perceber uma tendência.
 
 \subsubsection{Fórmula do \textit{EWMSD}}
-Dada uma série de retornos $x_1, x_2, \dots, x_n$, segue-se os seguintes passos
+Dada uma série de retornos $x_1, x_2, \dots, x_n$, segue-se os seguintes passos.
 
 \begin{enumerate}
-    \item Calcula-se a \textbf{Média Móvel Ponderada Exponeniclamente (\textit{Exponentially weighted Moving Average - EWMA})}: $$EWMA_t = \lambda \cdot x_t + (1 - \lambda) \cdot EWMA_{t - 1}$$ onde:
+    \item Calcula-se a \textbf{Média Móvel Ponderada Exponeniclamente (\textit{Exponentially Weighted Moving Average - EWMA})}: $$EWMA_t = \lambda \cdot x_t + (1 - \lambda) \cdot EWMA_{t - 1}$$ onde:
 
     \begin{itemize}
-        \item $\lambda$ é o fator de decaimento que determina quão rapidamente o peso para dados passados decai.
+        \item $\lambda$ é o fator de decaimento que determina quão rapidamente o peso para os dados passados decai.
         \item $x_t$ é o valor no tempo $t$
         \item $EWMA_{t - 1}$ é a \textit{EWMA} do passo anterior
     \end{itemize}
     
-    \item Calcula-se a \textbf{Variância Ponderada Exponeniclamente (\textit{Exponentially weighted Moving Variance - EWMV})}: $$EWMV_t = \lambda \cdot (x_t - EWMA_t)^2 + (1 - \lambda) \cdot EWMV_{t - 1}$$.
+    \item Calcula-se a \textbf{Variância Ponderada Exponeniclamente (\textit{Exponentially Weighted Moving Variance - EWMV})}: $$EWMV_t = \lambda \cdot (x_t - EWMA_t)^2 + (1 - \lambda) \cdot EWMV_{t - 1}$$.
     
     \item E por fim a \textbf{\textit{EWMSD}}: $$EWMSD_t = \sqrt{EWMV_t}$$
 \end{enumerate}
@@ -144,9 +143,9 @@ Dada uma série de retornos $x_1, x_2, \dots, x_n$, segue-se os seguintes passos
 \cite{Knight} O uso da \textit{EWMSD} é interessante por alguns motivos:
 
 \begin{itemize}
-    \item \textbf{Efeito de suavização}: Como o cálculo também da importância para valores passados de volatilidade, há uma maior robustez contra ruídos de valores no curto-prazo, o que é essencial para o bom treinamento de modelo de aprendizado de máquina. Contudo, como o peso dado aos valores ao longo do tempo decai exponencialmente, a \textit{EWMSD} ainda é bastante sensível a dados recentes, de forma que  reage em tempo hábil a mudanças de tendências.
+    \item \textbf{Efeito de suavização}: Como o cálculo também dá importância para valores passados de volatilidade, há uma maior robustez contra ruídos de valores no curto prazo, o que é essencial para o bom treinamento de modelo de aprendizado de máquina. Contudo, como o peso dado aos valores ao longo do tempo decai exponencialmente, a \textit{EWMSD} ainda é bastante sensível a dados recentes, de forma que  reage em tempo hábil a mudanças de tendências.
     
-    \item \textbf{Identificação de Acúmulos de Volatilidade}: a volatilidade em marcados tende a se acumular sobre períodos de tempo, com períodos de alta volatilidade tendendo a ser seguidos por períodos de mais alta volatilidade. A estatística ajuda a modelar esse comportamento se adaptando a volatilidades recentes enquanto recursivamente acumula volatilidades passadas
+    \item \textbf{Identificação de Acúmulos de Volatilidade}: a volatilidade em mercados tende a se acumular sobre períodos de tempo, com períodos de alta volatilidade tendendo a ser seguidos por períodos de mais alta volatilidade. A estatística ajuda a modelar esse comportamento se adaptando a volatilidades recentes enquanto recursivamente acumula volatilidades passadas.
 \end{itemize}
 
 \newpage
@@ -181,7 +180,7 @@ Em suma, o propósito do algoritmo é criar uma corrente de modelos fracos, em q
 
 \subsection{Modelo de Treinamento}
 
-Após realizar testes preliminares com uma versão inicial do modelo, utilizando algumas \textit{features} selecionadas, observamos que o \textit{Random Forest} apresentou o melhor desempenho em relação aos outros algoritmos avaliados. Além de alcançar resultados comparáveis aos modelos mais complexos, o \textit{Random Forest} destacou-se por sua eficiência computacional, exigindo baixo custo de processamento e oferecendo rápida execução. 
+Após realizar testes preliminares com uma versão inicial do modelo e utilizando algumas \textit{features} selecionadas, observamos que o \textit{Random Forest} apresentou o melhor desempenho em relação aos outros algoritmos avaliados. Além de alcançar resultados comparáveis aos modelos mais complexos, o \textit{Random Forest} destacou-se por sua eficiência computacional, exigindo baixo custo de processamento e oferecendo rápida execução. 
 
 Considerando essas vantagens, optamos por concentrar os esforços no desenvolvimento e teste de modelos de \textit{trend following} utilizando exclusivamente o \textit{Random Forest} como algoritmo de \textit{machine learning}. Essa abordagem permitiu uma maior agilidade nos experimentos, sem comprometer a qualidade dos resultados obtidos.
 
@@ -261,7 +260,7 @@ O principal objetivo foi criar um modelo robusto, capaz de operar eficientemente
 
 A escolha dos hiperparâmetros é uma etapa crítica no desenvolvimento de modelos de \textit{machine learning}, pois eles determinam o desempenho e a capacidade de generalização do modelo. Para essa tarefa, utilizamos a biblioteca \texttt{Optuna}, uma poderosa ferramenta de otimização de hiperparâmetros baseada em busca bayesiana.
 
-O \texttt{Optuna} permite explorar automaticamente o espaço de hiperparâmetros de forma eficiente, testando diferentes combinações e identificando aquelas que maximizam o desempenho do modelo. A otimização foi realizada utilizando métricas de validação baseadas em anos específicos, assegurando que o modelo fosse avaliado em cenários variados. Rodamos o modelo com 10 iterações para cada uma das otimizações da Random Forest.
+O \texttt{Optuna} permite explorar automaticamente o espaço de hiperparâmetros de forma eficiente, testando diferentes combinações e identificando aquelas que maximizam o desempenho do modelo. A otimização foi realizada utilizando métricas de validação baseadas em anos específicos, assegurando que o modelo fosse avaliado em cenários variados. Rodamos o modelo com 100 iterações para cada uma das otimizações da Random Forest.
 
 Os hiperparâmetros otimizados foram salvos em arquivos JSON. Isso elimina a necessidade de repetir a otimização, uma vez que os parâmetros podem ser carregados diretamente nas execuções futuras. Essa abordagem economiza tempo e recursos computacionais.
 
@@ -282,7 +281,7 @@ Para o desenvolvimento, exploramos dois tipos principais de modelos:
 
 \subsubsection{Modelo Não Binarizado}
 
-Nesse modelo, utilizamos uma rede neural para prever diretamente os sinais operacionais. A rede neural foi treinada com os dados históricos das ações, utilizando uma função de perda adequada para a tarefa de classificação. O modelo gera sinais baseando-se nas previsões contínuas fornecidas pela rede, sem transformá-las em valores discretos.
+Nesse modelo, utilizamos uma floresta aleatória para prever diretamente os sinais operacionais. A floresta foi treinada com os dados históricos das ações, utilizando uma função de perda adequada para a tarefa de classificação. O modelo gera sinais baseando-se nas previsões contínuas fornecidas pela rede, sem transformá-las em valores discretos.
 
 \subsubsection{Modelo Binarizado}
 
@@ -425,10 +424,10 @@ A seguir, analisamos como o número de indicadores influencia a acurácia do mod
     \label{fig:features-acuracia}
 \end{figure}
 
-A única ação que alcançou cerca de 40\% de acurácia foi VIVA3 ( o treshold definido anteriormente), com dados binarizados.
+A única ação que alcançou cerca de 40\% de acurácia (o threshold definido anteriormente) foi VIVA3 com dados binarizados.
 
 \paragraph{Features mais relevantes}
-Por fim, identificamos as features mais relevantes para o modelo.Para isso contamos quantas vezes cada indicador é utilizado no conjunto de dados, realizando a substituição dos nomes abreviados para os nomes completos dos indicadores. Além disso, o cálculo da frequência leva em consideração as janelas dos indicadores para ajustar a contagem, refletindo a quantidade de vezes que um indicador foi considerado relevante para a classificação. O gráfico a seguir destaca essas informações:
+Por fim, identificamos as features mais relevantes para o modelo. Para isso, contamos quantas vezes cada indicador é utilizado no conjunto de dados, realizando a substituição dos nomes abreviados para os nomes completos dos indicadores. Além disso, o cálculo da frequência leva em consideração as janelas dos indicadores para ajustar a contagem, refletindo a quantidade de vezes que um indicador foi considerado relevante para a classificação. O gráfico a seguir destaca essas informações:
 
 \begin{figure}[H]
     \centering
@@ -437,11 +436,11 @@ Por fim, identificamos as features mais relevantes para o modelo.Para isso conta
     \label{fig:features-importance}
 \end{figure}
 
-Notamos que os recursos que mais contribuíram para a importância foram, em ordem, o \texttt{Mass Index}, seguido de \texttt{Commodity Channel Index} e o \texttt{Average Directional Index}, seguido pelo \texttt{Average True Range}. Isso indica que esses recursos têm alta importância para a maioria das variáveis.
+Notamos que os recursos que mais contribuíram para a importância foram, em ordem, o \texttt{Mass Index}, o \texttt{Commodity Channel Index} e o \texttt{Average Directional Index}, seguido pelo \texttt{Average True Range}. Isso indica que esses recursos têm alta importância para a maioria das variáveis.
 
 
 \subsection{Melhores resultados}
-Então pegamos os melhores hiperparâmetros encontrados na validação e então aplicamos o backtest com esses resultados. Obtemos assim os seguinte resultados:
+Então, pegamos os melhores hiperparâmetros encontrados na validação e aplicamos o backtest com esses resultados. Obtivemos assim os seguinte resultados:
 
 \begin{table}[h!]
 \centering
@@ -457,7 +456,7 @@ Então pegamos os melhores hiperparâmetros encontrados na validação e então 
 \caption{Tabela com valores binarizados e não binarizados.}
 \end{table}
 
-A análise mostra que, embora o modelo tenha alcançado bons desempenhos em alguns ativos, os resultados não foram consistentes para todos. Por exemplo, no caso de AZUL, o modelo binarizado apresentou uma queda significativa no desempenho, enquanto para PRIO e VIVA, o mesmo modelo obteve resultados positivos.
+A análise mostra que, embora o modelo tenha alcançado bons desempenhos em alguns ativos, os resultados não foram consistentes para todos. Por exemplo, no caso de AZUL, o modelo binarizado apresentou uma queda significativa no desempenho, enquanto para PRIO e VIVA o mesmo modelo obteve resultados positivos.
 
 Portanto, embora alguns cenários indiquem o potencial do modelo, não foi possível garantir a eficiência de forma geral devido à variação nos retornos entre diferentes ativos.
 
